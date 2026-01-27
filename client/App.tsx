@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import './App.css';
-import { init } from '@telegram-apps/sdk';
+import { useState, useEffect } from "react";
+import { init } from "@telegram-apps/sdk";
+import NonTg from "./pages/NonTg";
 interface ApiResponse {
   message: string;
 }
 
 function App() {
-  try{
-    init()
-  }catch(e){
-    
+  try {
+    init();
+  } catch (e) {
+    return <NonTg />;
   }
-  const [message, setMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,14 +23,14 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/hello');
+      const response = await fetch("/api/hello");
       if (!response.ok) {
-        throw new Error('Failed to fetch');
+        throw new Error("Failed to fetch");
       }
       const data: ApiResponse = await response.json();
       setMessage(data.message);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -60,4 +60,3 @@ function App() {
 }
 
 export default App;
-
