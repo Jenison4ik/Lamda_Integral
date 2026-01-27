@@ -18,7 +18,7 @@ bot.command("menu", (ctx) => {
 
 // Обработка нажатий
 bot.callbackQuery("btn1", (ctx) => ctx.answerCallbackQuery({ text: "Нажата кнопка 1" }));
-bot.callbackQuery("btn2", (ctx) => ctx.reply("Нажата кнопка 2"));
+bot.callbackQuery("btn2", (ctx) => ctx.reply("Нажата кнопка 2").then(() => {return true}));
 
 bot.command("keyboard", (ctx) => {
   const keyboard = new Keyboard()
