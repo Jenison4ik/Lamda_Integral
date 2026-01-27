@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-
+import { init } from '@telegram-apps/sdk';
 interface ApiResponse {
   message: string;
 }
 
 function App() {
+  init()
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
