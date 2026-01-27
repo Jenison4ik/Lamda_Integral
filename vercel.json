@@ -2,9 +2,19 @@
   "version": 2,
   "buildCommand": "npm run build:client",
   "outputDirectory": "dist/client",
+  "functions": {
+    "api/bot.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/health",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/hello",
       "destination": "/api"
     },
     {
