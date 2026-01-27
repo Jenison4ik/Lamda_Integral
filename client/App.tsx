@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { init } from "@telegram-apps/sdk";
+import { init } from "@tma.js/sdk-react";
 import NonTg from "./pages/NonTg";
+import { hapticFeedback } from "@tma.js/sdk-react";
 interface ApiResponse {
   message: string;
 }
@@ -20,6 +21,7 @@ function App() {
   }, []);
 
   const fetchMessage = async () => {
+    hapticFeedback.isSupported() && hapticFeedback.impactOccurred("medium");
     setLoading(true);
     setError(null);
     try {
