@@ -6,7 +6,11 @@ interface ApiResponse {
 }
 
 function App() {
-  init()
+  try{
+    init()
+  }catch(e){
+    
+  }
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
