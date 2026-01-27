@@ -2,31 +2,51 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { Bot } from "grammy";
-import { fileURLToPath } from "url";
+
+dotenv.config();
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
   throw new Error("TELEGRAM_BOT_TOKEN is not set");
 }
-
-dotenv.config();
 const bot = new Bot(token);
 
 bot.command("start", async (ctx) => {
-  await ctx.reply("Welcome! Up and running.", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "🚀 Открыть",
-            web_app: {
-              url: "https://lambda-integral.vercel.app/",
+  await ctx.reply(
+    `
+👋 Привет!
+
+Я — бот-тренажёр по интегралам 📐  
+Здесь ты можешь потренироваться решать интегралы разной сложности и проверить свои знания.
+
+🚀 Как это работает:
+• Выбираешь уровень сложности
+• Решaешь несколько случайных задач
+• Выбираешь правильный ответ
+• В конце получаешь результат и статистику
+
+📊 Доступные уровни:
+• Простой — базовые интегралы
+• Средний — чуть больше логики
+• Сложный — для тех, кто хочет челлендж 🔥
+
+Нажми кнопку ниже и начнём!
+`,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "🚀 Открыть",
+              web_app: {
+                url: "https://lambda-integral.vercel.app/",
+              },
             },
-          },
+          ],
         ],
-      ],
+      },
     },
-  });
+  );
 });
 
 const app = express();
