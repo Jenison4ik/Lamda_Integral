@@ -53,9 +53,75 @@ const createRowId = () => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const parsePayload = (raw: unknown): QuestionPayload => {
+const parseQuestionItem = (item: unknown, index: number): QuestionItem => {
+  if (!isRecord(item)) {
+    throw new Error(`Вопрос #${index + 1} должен быть объектом.`);
+  }
+  if (typeof item.question !== "string" || !item.question.trim()) {
+    throw new Error(`Вопрос #${index + 1}: поле question обязательно.`);
+  }
+  if (!Array.isArray(item.answers) || item.answers.length === 0) {
+    throw new Error(
+      `Вопрос #${index + 1}: поле answers должно быть непустым массивом.`,
+    );
+  }
+  if (!item.answers.every((answer) => typeof answer === "string")) {
+    throw new Error(
+      `Вопрос #${index + 1}: все элементы answers должны быть строками.`,
+    );
+  }
+  if (typeof item.correct !== "number" || !Number.isInteger(item.correct)) {
+    throw new Error(
+      `Вопрос #${index + 1}: поле correct должно быть целым числом.`,
+    );
+  }
+  if (item.correct < 0 || item.correct >= item.answers.length) {
+    throw new Error(
+      `Вопрос #${index + 1}: поле correct выходит за пределы answers.`,
+    );
+  }
+  return {
+    question: item.question.trim(),
+    answers: item.answers,
+    correct: item.correct,
+  };
+};
+
+const parsePayload = (raw: unknown): QuestionPayload[] => {
+  // Поддержка формата: массив объектов
+  if (Array.isArray(raw)) {
+    if (raw.length === 0) {
+      throw new Error("Файл содержит пустой массив.");
+    }
+    return raw.map((item, index) => {
+      if (!isRecord(item)) {
+        throw new Error(`Элемент #${index + 1} массива должен быть объектом.`);
+      }
+      const difficulty = item.difficulty;
+      if (typeof difficulty !== "string" || !difficulty.trim()) {
+        throw new Error(
+          `Элемент #${index + 1}: поле difficulty обязательно и должно быть строкой.`,
+        );
+      }
+      const questions = item.questions;
+      if (!Array.isArray(questions) || questions.length === 0) {
+        throw new Error(
+          `Элемент #${index + 1}: поле questions должно быть непустым массивом.`,
+        );
+      }
+      const parsedQuestions = questions.map((q, qIndex) =>
+        parseQuestionItem(q, qIndex + 1),
+      );
+      return {
+        difficulty: difficulty.trim(),
+        questions: parsedQuestions,
+      };
+    });
+  }
+
+  // Поддержка формата: один объект
   if (!isRecord(raw)) {
-    throw new Error("Файл должен содержать JSON-объект.");
+    throw new Error("Файл должен содержать JSON-объект или массив объектов.");
   }
 
   const difficulty = raw.difficulty;
@@ -68,44 +134,16 @@ const parsePayload = (raw: unknown): QuestionPayload => {
     throw new Error("Поле questions должно быть непустым массивом.");
   }
 
-  const parsedQuestions = questions.map((item, index) => {
-    if (!isRecord(item)) {
-      throw new Error(`Вопрос #${index + 1} должен быть объектом.`);
-    }
-    if (typeof item.question !== "string" || !item.question.trim()) {
-      throw new Error(`Вопрос #${index + 1}: поле question обязательно.`);
-    }
-    if (!Array.isArray(item.answers) || item.answers.length === 0) {
-      throw new Error(
-        `Вопрос #${index + 1}: поле answers должно быть непустым массивом.`,
-      );
-    }
-    if (!item.answers.every((answer) => typeof answer === "string")) {
-      throw new Error(
-        `Вопрос #${index + 1}: все элементы answers должны быть строками.`,
-      );
-    }
-    if (typeof item.correct !== "number" || !Number.isInteger(item.correct)) {
-      throw new Error(
-        `Вопрос #${index + 1}: поле correct должно быть целым числом.`,
-      );
-    }
-    if (item.correct < 0 || item.correct >= item.answers.length) {
-      throw new Error(
-        `Вопрос #${index + 1}: поле correct выходит за пределы answers.`,
-      );
-    }
-    return {
-      question: item.question.trim(),
-      answers: item.answers,
-      correct: item.correct,
-    };
-  });
+  const parsedQuestions = questions.map((item, index) =>
+    parseQuestionItem(item, index + 1),
+  );
 
-  return {
-    difficulty: difficulty.trim(),
-    questions: parsedQuestions,
-  };
+  return [
+    {
+      difficulty: difficulty.trim(),
+      questions: parsedQuestions,
+    },
+  ];
 };
 
 export default function AdminPanel() {
@@ -155,22 +193,32 @@ export default function AdminPanel() {
 
     try {
       const text = await file.text();
-      const parsed = parsePayload(JSON.parse(text));
-      const nextRows = parsed.questions.map((question) => ({
-        id: createRowId(),
-        difficulty: parsed.difficulty,
-        question: question.question,
-        answers: question.answers,
-        correct: question.correct,
-        source: file.name,
-      }));
+      const payloads = parsePayload(JSON.parse(text));
+      const nextRows: QuestionRow[] = [];
+
+      // Обрабатываем каждый payload (может быть массив или один объект)
+      for (const payload of payloads) {
+        for (const question of payload.questions) {
+          nextRows.push({
+            id: createRowId(),
+            difficulty: payload.difficulty,
+            question: question.question,
+            answers: question.answers,
+            correct: question.correct,
+            source: file.name,
+          });
+        }
+      }
+
       setRows((prev) => [...nextRows, ...prev]);
       setImportSuccess(
         `Импортировано вопросов: ${nextRows.length} (файл ${file.name}).`,
       );
     } catch (error) {
       setImportError(
-        error instanceof Error ? error.message : "Не удалось импортировать файл.",
+        error instanceof Error
+          ? error.message
+          : "Не удалось импортировать файл.",
       );
     } finally {
       event.target.value = "";
@@ -214,7 +262,11 @@ export default function AdminPanel() {
                   disabled={!ADMIN_PASSWORD}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={!ADMIN_PASSWORD}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={!ADMIN_PASSWORD}
+              >
                 Войти
               </Button>
             </form>
@@ -284,9 +336,7 @@ export default function AdminPanel() {
         <Card>
           <CardHeader>
             <CardTitle>Таблица вопросов</CardTitle>
-            <CardDescription>
-              Всего загружено: {rows.length}
-            </CardDescription>
+            <CardDescription>Всего загружено: {rows.length}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -323,7 +373,9 @@ export default function AdminPanel() {
                           {row.answers.map((answer, index) => (
                             <Badge
                               key={`${row.id}-${index}`}
-                              variant={index === row.correct ? "default" : "secondary"}
+                              variant={
+                                index === row.correct ? "default" : "secondary"
+                              }
                             >
                               {index + 1}. {answer}
                             </Badge>
