@@ -41,6 +41,10 @@ type QuestionRow = {
   source: string;
 };
 
+type ImportQuestionsResponse =
+  | { ok: true; createdQuestions: number; createdAnswers: number }
+  | { ok: false; error: string };
+
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "";
 
 const createRowId = () => {
@@ -156,6 +160,7 @@ export default function AdminPanel() {
   const [rows, setRows] = useState<QuestionRow[]>([]);
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -191,6 +196,7 @@ export default function AdminPanel() {
       return;
     }
 
+    setIsImporting(true);
     try {
       const text = await file.text();
       const payloads = parsePayload(JSON.parse(text));
@@ -210,9 +216,33 @@ export default function AdminPanel() {
         }
       }
 
+      const response = await fetch("/api/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payloads }),
+      });
+      const responseText = await response.text();
+      let data: ImportQuestionsResponse;
+      try {
+        data = responseText
+          ? JSON.parse(responseText)
+          : { ok: false, error: "" };
+      } catch {
+        throw new Error(
+          response.ok
+            ? "Сервер вернул не JSON"
+            : `Сервер вернул ${response.status}. Убедитесь, что бэкенд запущен.`,
+        );
+      }
+      if (!response.ok || !data.ok) {
+        throw new Error(
+          data.ok ? "Не удалось импортировать вопросы" : data.error,
+        );
+      }
+
       setRows((prev) => [...nextRows, ...prev]);
       setImportSuccess(
-        `Импортировано вопросов: ${nextRows.length} (файл ${file.name}).`,
+        `Импортировано вопросов: ${nextRows.length} (файл ${file.name}). В БД добавлено: ${data.createdQuestions}.`,
       );
     } catch (error) {
       setImportError(
@@ -221,6 +251,7 @@ export default function AdminPanel() {
           : "Не удалось импортировать файл.",
       );
     } finally {
+      setIsImporting(false);
       event.target.value = "";
     }
   };
@@ -320,12 +351,14 @@ export default function AdminPanel() {
                   type="file"
                   accept="application/json,.json"
                   onChange={handleFileChange}
+                  disabled={isImporting}
                 />
               </div>
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => setRows([])}
+                disabled={isImporting}
               >
                 Очистить таблицу
               </Button>
