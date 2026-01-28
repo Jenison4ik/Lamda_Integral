@@ -1,4 +1,5 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "buildCommand": "npm run build:client",
   "outputDirectory": "dist/client",
@@ -6,25 +7,16 @@
     "api/bot.ts": {
       "memory": 1024,
       "maxDuration": 10
+    },
+    "api/users.ts": {
+      "memory": 512,
+      "maxDuration": 10
     }
   },
   "rewrites": [
     {
-      "source": "/api/health",
-      "destination": "/api"
-    },
-    {
-      "source": "/api/hello",
-      "destination": "/api"
-    },
-    {
-      "source": "/api/users",
-      "destination": "/api"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
 }
-
