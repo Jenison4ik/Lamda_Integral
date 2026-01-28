@@ -1,18 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './lib/prisma';
 
 export const runtime = "nodejs";
-
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: ["error"],
-  });
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { pathname } = new URL(req.url || '/', `http://${req.headers.host}`);
