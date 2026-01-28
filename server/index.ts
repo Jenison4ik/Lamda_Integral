@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { Bot, webhookCallback } from "grammy";
 
+import { prisma } from "./lib/prisma";
+
 dotenv.config();
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -53,6 +55,41 @@ app.get("/api/health", (req: Request, res: Response) => {
 
 app.get("/api/hello", (req: Request, res: Response) => {
   res.json({ message: "Hello from Express backend!" });
+});
+
+// --- Пользователи (тест) ---
+app.post("/api/users", async (req: Request, res: Response) => {
+  try {
+    const body = req.body as { telegramId?: number | string; username?: string };
+    const telegramId = body.telegramId != null
+      ? BigInt(body.telegramId)
+      : BigInt(Date.now());
+    const username = typeof body.username === "string" ? body.username : null;
+
+    const user = await prisma.user.create({
+      data: {
+        telegramId,
+        username,
+      },
+    });
+
+    res.status(201).json({
+      ok: true,
+      user: {
+        id: user.id,
+        telegramId: user.telegramId.toString(),
+        username: user.username,
+        createdAt: user.createdAt.toISOString(),
+      },
+    });
+  } catch (e) {
+    console.error("POST /api/users", e);
+    const isUnique = e && typeof e === "object" && "code" in e && e.code === "P2002";
+    res.status(isUnique ? 409 : 500).json({
+      ok: false,
+      error: isUnique ? "Пользователь с таким telegramId уже есть" : "Не удалось создать пользователя",
+    });
+  }
 });
 
 // --- Ошибки ---
