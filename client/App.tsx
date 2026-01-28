@@ -4,6 +4,13 @@ import NonTg from "./pages/NonTg";
 import { hapticFeedback, swipeBehavior } from "@tma.js/sdk-react";
 import { Button } from "./components/ui/button";
 import { Slider } from "./components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./components/ui/select";
 
 interface ApiResponse {
   message: string;
@@ -11,7 +18,12 @@ interface ApiResponse {
 
 interface CreateUserResponse {
   ok: boolean;
-  user?: { id: number; telegramId: string; username: string | null; createdAt: string };
+  user?: {
+    id: number;
+    telegramId: string;
+    username: string | null;
+    createdAt: string;
+  };
   error?: string;
 }
 
@@ -21,7 +33,7 @@ function App() {
   } catch (e) {
     return <NonTg />;
   }
-  
+
   // Получаем параметры запуска, которые содержат данные пользователя
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
   const user = launchParams?.tgWebAppData?.user || null;
@@ -31,6 +43,9 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [feedback, setFeedback] = useState<
+    "light" | "medium" | "heavy" | "rigid" | "soft"
+  >("light");
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [addUserError, setAddUserError] = useState<string | null>(null);
   const [addUserSuccess, setAddUserSuccess] = useState<string | null>(null);
@@ -82,7 +97,7 @@ function App() {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({telegramId: user.id, username: user.username}),
+        body: JSON.stringify({ telegramId: user.id, username: user.username }),
       });
       const text = await res.text();
       let data: CreateUserResponse;
@@ -98,7 +113,9 @@ function App() {
       if (!res.ok || !data.ok) {
         throw new Error(data.error ?? "Ошибка при создании пользователя");
       }
-      setAddUserSuccess(`Пользователь #${data.user!.id} (tg: ${data.user!.telegramId}) создан`);
+      setAddUserSuccess(
+        `Пользователь #${data.user!.id} (tg: ${data.user!.telegramId}) создан`,
+      );
     } catch (err) {
       setAddUserError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -111,6 +128,12 @@ function App() {
       <header className="app-header">
         <h1>TG Integral App 2.0</h1>
         <p>React + Vite + Express + TypeScript</p>
+        <img
+          src={user?.photo_url ?? "./img/user_placeholder.jpeg"}
+          alt=""
+          className="w-[100px] h-[100px] rounded-full object-cover"
+        />
+        <p>Hi 👋, {user?.first_name ?? ""}</p>
       </header>
       <main className="app-main">
         {loading && <p>Загрузка...</p>}
@@ -133,10 +156,46 @@ function App() {
           >
             {addUserLoading ? "Добавляем…" : "Добавить пользователя"}
           </Button>
-          {addUserError && <p className="error" style={{ marginTop: "0.5rem" }}>{addUserError}</p>}
-          {addUserSuccess && <p style={{ marginTop: "0.5rem", color: "var(--success, green)" }}>{addUserSuccess}</p>}
+          {addUserError && (
+            <p className="error" style={{ marginTop: "0.5rem" }}>
+              {addUserError}
+            </p>
+          )}
+          {addUserSuccess && (
+            <p style={{ marginTop: "0.5rem", color: "var(--success, green)" }}>
+              {addUserSuccess}
+            </p>
+          )}
         </div>
-        <Slider onValueChange={()=>{hapticFeedback.isSupported() && hapticFeedback.impactOccurred("medium");}} min={0} max={100} defaultValue={[20]} step={10}/>
+        <Select
+          value={feedback}
+          onValueChange={(value) =>
+            setFeedback(
+              value as "light" | "medium" | "heavy" | "rigid" | "soft",
+            )
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a feedback" />
+          </SelectTrigger>
+        </Select>
+        <SelectContent>
+          <SelectItem value="light">Light</SelectItem>
+          <SelectItem value="medium">Medium</SelectItem>
+          <SelectItem value="heavy">Heavy</SelectItem>
+          <SelectItem value="rigid">Rigid</SelectItem>
+          <SelectItem value="soft">Soft</SelectItem>
+        </SelectContent>
+        <Slider
+          onValueChange={() => {
+            hapticFeedback.isSupported() &&
+              hapticFeedback.impactOccurred(feedback);
+          }}
+          min={0}
+          max={100}
+          defaultValue={[20]}
+          step={10}
+        />
       </main>
       <div>
         <p>Информация о пользователе</p>
@@ -185,7 +244,6 @@ function App() {
 
 export default App;
 
-
-function RowRender({children}:{children: React.ReactNode}) {
-  return <div style={{maxWidth:"90%"}}>{children}</div>
+function RowRender({ children }: { children: React.ReactNode }) {
+  return <div style={{ maxWidth: "90%" }}>{children}</div>;
 }
