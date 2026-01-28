@@ -17,37 +17,44 @@ export interface ImportQuestionsStats {
   createdAnswers: number;
 }
 
+const TRANSACTION_CHUNK_SIZE = 20;
+
 async function importQuestions(
   payloads: ImportQuestionsPayload[],
 ): Promise<ImportQuestionsStats> {
   let createdQuestions = 0;
   let createdAnswers = 0;
 
-  const operations = payloads.flatMap((payload) =>
-    payload.questions.map((question) => {
+  const operations: ReturnType<typeof prisma.question.create>[] = [];
+
+  for (const payload of payloads) {
+    for (const question of payload.questions) {
       createdQuestions += 1;
       createdAnswers += question.answers.length;
 
-      return prisma.question.create({
-        data: {
-          difficulty: payload.difficulty,
-          text: question.question,
-          answerOptions: {
-            create: question.answers.map((answer, index) => ({
-              text: answer,
-              isCorrect: index === question.correct,
-            })),
-          },
+      const data = {
+        difficulty: payload.difficulty,
+        text: question.question,
+        answerOptions: {
+          create: question.answers.map((answer, index) => ({
+            text: answer,
+            isCorrect: index === question.correct,
+          })),
         },
-      });
-    }),
-  );
+      } as unknown as Parameters<typeof prisma.question.create>[0]["data"];
 
-  if (operations.length === 0) {
-    return { createdQuestions: 0, createdAnswers: 0 };
+      operations.push(prisma.question.create({ data }));
+
+      if (operations.length >= TRANSACTION_CHUNK_SIZE) {
+        await prisma.$transaction(operations);
+        operations.length = 0;
+      }
+    }
   }
 
-  await prisma.$transaction(operations);
+  if (operations.length > 0) {
+    await prisma.$transaction(operations);
+  }
 
   return { createdQuestions, createdAnswers };
 }
