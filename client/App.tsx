@@ -72,10 +72,13 @@ function App() {
     setAddUserError(null);
     setAddUserSuccess(null);
     try {
+      if (!user) {
+        throw new Error("User not found");
+      }
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({telegramId: user.id, username: user.username}),
       });
       const text = await res.text();
       let data: CreateUserResponse;

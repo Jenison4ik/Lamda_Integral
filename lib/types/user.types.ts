@@ -6,8 +6,8 @@
  * Входные данные для создания пользователя
  */
 export interface CreateUserInput {
-  telegramId?: number | string;
-  username?: string;
+  telegramId: number | string;
+  username: string;
 }
 
 /**

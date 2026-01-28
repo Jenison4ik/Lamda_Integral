@@ -19,7 +19,10 @@ if (!token) {
   throw new Error('TELEGRAM_BOT_TOKEN is not set');
 }
 
-const webAppUrl = process.env.WEB_APP_URL || 'https://lamda-integral.vercel.app/';
+const webAppUrl = process.env.WEB_APP_URL 
+if(!webAppUrl){
+  throw new Error('WEB_APP_URL is not set')
+}
 
 // Создаём бота через фабрику (platform-agnostic)
 const bot = createBot({ token, webAppUrl });

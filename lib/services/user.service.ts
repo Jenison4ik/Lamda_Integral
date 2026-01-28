@@ -46,8 +46,17 @@ async function create(input: CreateUserInput): Promise<UserDto> {
     : null;
 
   try {
-    const user = await prisma.user.create({
-      data: { telegramId, username },
+    const user = await prisma.user.upsert({
+      where: { telegramId: telegramId },
+      update: {
+        lastSeen: new Date()
+      },
+      create: {
+        telegramId: telegramId,
+        username: username,
+        lastSeen: new Date(),
+        createdAt: new Date(),
+      }
     });
 
     return toUserDto(user);
