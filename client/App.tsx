@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { init, retrieveLaunchParams } from "@tma.js/sdk-react";
 import NonTg from "./pages/NonTg";
-import { hapticFeedback } from "@tma.js/sdk-react";
+import { hapticFeedback, swipeBehavior } from "@tma.js/sdk-react";
 import { Button } from "./components/ui/button";
 import { Slider } from "./components/ui/slider";
 
@@ -37,6 +37,9 @@ function App() {
 
   useEffect(() => {
     fetchMessage();
+
+    swipeBehavior.disableVertical();
+
   }, []);
 
   const fetchMessage = async () => {
