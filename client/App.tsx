@@ -37,9 +37,9 @@ function App() {
 
   useEffect(() => {
     fetchMessage();
-
+    swipeBehavior.mount();
     swipeBehavior.disableVertical();
-
+    return swipeBehavior.unmount();
   }, []);
 
   const fetchMessage = async () => {
