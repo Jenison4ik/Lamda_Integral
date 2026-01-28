@@ -8,7 +8,7 @@ export default function NonTg() {
   }
 
   return (
-    <div className="relative min-h-screen w-screen text-white">
+    <div className="relative h-screen w-screen text-white overflow-hidden">
       <div className="fixed inset-0 -z-10">
         <DarkVeil
           hueShift={0}
@@ -20,7 +20,7 @@ export default function NonTg() {
           resolutionScale={1}
         />
       </div>
-      <div className="relative flex flex-col items-center justify-center gap-4 h-screen w-screen">
+      <div className="relative flex flex-col items-center justify-center gap-4 h-full w-full">
         <h1 className="font-bold text-6xl">Lamda Integrall</h1>
         <p>
           Это телеграм бот для тренировки по интегрированию, вы можете
