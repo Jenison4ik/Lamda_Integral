@@ -178,14 +178,15 @@ function App() {
           <SelectTrigger>
             <SelectValue placeholder="Select a feedback" />
           </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="light">Light</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="heavy">Heavy</SelectItem>
+            <SelectItem value="rigid">Rigid</SelectItem>
+            <SelectItem value="soft">Soft</SelectItem>
+          </SelectContent>
         </Select>
-        <SelectContent>
-          <SelectItem value="light">Light</SelectItem>
-          <SelectItem value="medium">Medium</SelectItem>
-          <SelectItem value="heavy">Heavy</SelectItem>
-          <SelectItem value="rigid">Rigid</SelectItem>
-          <SelectItem value="soft">Soft</SelectItem>
-        </SelectContent>
+
         <Slider
           onValueChange={() => {
             hapticFeedback.isSupported() &&
