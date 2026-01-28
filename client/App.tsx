@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { init, retrieveRawInitData } from "@tma.js/sdk-react";
+import { useState, useEffect, useMemo } from "react";
+import { init, retrieveLaunchParams } from "@tma.js/sdk-react";
 import NonTg from "./pages/NonTg";
-import { hapticFeedback, useRawInitData } from "@tma.js/sdk-react";
+import { hapticFeedback } from "@tma.js/sdk-react";
 import { Button } from "./components/ui/button";
 
 interface ApiResponse {
@@ -20,8 +20,11 @@ function App() {
   } catch (e) {
     return <NonTg />;
   }
-  const user = retrieveRawInitData();
-  const user2 = useRawInitData()
+  
+  // Получаем параметры запуска, которые содержат данные пользователя
+  const launchParams = useMemo(() => retrieveLaunchParams(), []);
+  const user = launchParams?.tgWebAppData?.user || null;
+  const initData = launchParams?.tgWebAppData || null;
 
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -129,8 +132,44 @@ function App() {
       </main>
       <div>
         <p>Информация о пользователе</p>
-        <RowRender>{JSON.stringify(user)}</RowRender>
-        <RowRender>{JSON.stringify(user2)}</RowRender>
+        {user ? (
+          <>
+            <RowRender>
+              <div>
+                <strong>ID:</strong> {user.id}
+              </div>
+              <div>
+                <strong>Имя:</strong> {user.first_name} {user.last_name || ""}
+              </div>
+              <div>
+                <strong>Username:</strong> {user.username || "не указан"}
+              </div>
+              <div>
+                <strong>Язык:</strong> {user.language_code || "не указан"}
+              </div>
+              <div style={{ marginTop: "1rem" }}>
+                <strong>Полные данные (JSON):</strong>
+                <pre style={{ fontSize: "0.8rem", overflow: "auto" }}>
+                  {JSON.stringify(user, null, 2)}
+                </pre>
+              </div>
+            </RowRender>
+            {initData && (
+              <div style={{ marginTop: "1rem" }}>
+                <RowRender>
+                  <div>
+                    <strong>Init Data (JSON):</strong>
+                    <pre style={{ fontSize: "0.8rem", overflow: "auto" }}>
+                      {JSON.stringify(initData, null, 2)}
+                    </pre>
+                  </div>
+                </RowRender>
+              </div>
+            )}
+          </>
+        ) : (
+          <RowRender>Данные пользователя недоступны</RowRender>
+        )}
       </div>
     </div>
   );
