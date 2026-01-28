@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { init } from "@tma.js/sdk-react";
 import NonTg from "./pages/NonTg";
-import { hapticFeedback } from "@tma.js/sdk-react";
+import { hapticFeedback, useRawInitData } from "@tma.js/sdk-react";
 import { Button } from "./components/ui/button";
 
 interface ApiResponse {
@@ -20,6 +20,8 @@ function App() {
   } catch (e) {
     return <NonTg />;
   }
+  const user = useRawInitData();
+
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +126,10 @@ function App() {
           {addUserSuccess && <p style={{ marginTop: "0.5rem", color: "var(--success, green)" }}>{addUserSuccess}</p>}
         </div>
       </main>
+      <div>
+        <p>Информация о пользователе</p>
+        {JSON.stringify(user)}
+      </div>
     </div>
   );
 }
