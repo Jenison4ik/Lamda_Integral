@@ -18,6 +18,10 @@
       "destination": "/api"
     },
     {
+      "source": "/api/users",
+      "destination": "/api"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
