@@ -10,11 +10,20 @@
  */
 
 import { prisma } from "../prisma.js";
-import { ImportQuestionsPayload } from "../types/question.types.js";
+import {
+  ImportQuestionsPayload,
+  QuestionDto,
+} from "../types/question.types.js";
 
 export interface ImportQuestionsStats {
   createdQuestions: number;
   createdAnswers: number;
+}
+
+interface GetQuestionsParams {
+  difficulty?: string;
+  limit: number;
+  offset: number;
 }
 
 async function importQuestions(
@@ -53,6 +62,35 @@ async function importQuestions(
   return { createdQuestions, createdAnswers };
 }
 
+async function getQuestions(
+  params: GetQuestionsParams,
+): Promise<QuestionDto[]> {
+  const questions = await prisma.question.findMany({
+    where: params.difficulty ? { difficulty: params.difficulty } : undefined,
+    orderBy: { id: "desc" },
+    skip: params.offset,
+    take: params.limit,
+    include: {
+      answerOptions: {
+        orderBy: { id: "asc" },
+      },
+    },
+  });
+
+  return questions.map((question) => ({
+    id: question.id,
+    difficulty: question.difficulty,
+    text: question.text,
+    createdAt: question.createdAt.toISOString(),
+    answers: question.answerOptions.map((answer) => ({
+      id: answer.id,
+      text: answer.text,
+      isCorrect: answer.isCorrect,
+    })),
+  }));
+}
+
 export const questionService = {
   importQuestions,
+  getQuestions,
 };

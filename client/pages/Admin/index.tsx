@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,6 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -33,11 +40,10 @@ type QuestionItem = {
 };
 
 type QuestionRow = {
-  id: string;
+  id: number | string;
   difficulty: string;
   question: string;
-  answers: string[];
-  correct: number;
+  answers: { text: string; isCorrect: boolean }[];
   source: string;
 };
 
@@ -45,14 +51,24 @@ type ImportQuestionsResponse =
   | { ok: true; createdQuestions: number; createdAnswers: number }
   | { ok: false; error: string };
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "";
+type GetQuestionsResponse =
+  | {
+      ok: true;
+      questions: {
+        id: number;
+        difficulty: string;
+        text: string;
+        createdAt: string;
+        answers: { id: number; text: string; isCorrect: boolean }[];
+      }[];
+      nextOffset: number;
+      hasMore: boolean;
+    }
+  | { ok: false; error: string };
 
-const createRowId = () => {
-  if (typeof globalThis.crypto?.randomUUID === "function") {
-    return globalThis.crypto.randomUUID();
-  }
-  return `q_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-};
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "";
+const PAGE_SIZE = 30;
+const SCROLL_ROOT_MARGIN = "240px";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -161,6 +177,13 @@ export default function AdminPanel() {
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const isLoadingRef = useRef(false);
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -185,6 +208,99 @@ export default function AdminPanel() {
     setPassword("");
   };
 
+  const fetchQuestions = useCallback(
+    async (nextOffset: number, replace: boolean) => {
+      if (isLoadingRef.current) return;
+      isLoadingRef.current = true;
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const params = new URLSearchParams();
+        params.set("limit", String(PAGE_SIZE));
+        params.set("offset", String(nextOffset));
+        if (difficultyFilter !== "all") {
+          params.set("difficulty", difficultyFilter);
+        }
+
+        const response = await fetch(`/api/questions?${params.toString()}`);
+        const responseText = await response.text();
+        let data: GetQuestionsResponse;
+        try {
+          data = responseText
+            ? JSON.parse(responseText)
+            : { ok: false, error: "" };
+        } catch {
+          throw new Error(
+            response.ok
+              ? "Сервер вернул не JSON"
+              : `Сервер вернул ${response.status}. Убедитесь, что бэкенд запущен.`,
+          );
+        }
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.ok ? "Не удалось получить вопросы" : data.error);
+        }
+
+        const mappedRows: QuestionRow[] = data.questions.map((question) => ({
+          id: question.id,
+          difficulty: question.difficulty,
+          question: question.text,
+          answers: question.answers.map((answer) => ({
+            text: answer.text,
+            isCorrect: answer.isCorrect,
+          })),
+          source: "БД",
+        }));
+
+        setRows((prev) => (replace ? mappedRows : [...prev, ...mappedRows]));
+        setOffset(data.nextOffset);
+        setHasMore(data.hasMore);
+      } catch (error) {
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "Не удалось получить вопросы.",
+        );
+      } finally {
+        setIsLoading(false);
+        isLoadingRef.current = false;
+      }
+    },
+    [difficultyFilter],
+  );
+
+  const resetAndLoad = useCallback(() => {
+    setRows([]);
+    setOffset(0);
+    setHasMore(true);
+    fetchQuestions(0, true);
+  }, [fetchQuestions]);
+
+  useEffect(() => {
+    if (!isAuthed) return;
+    resetAndLoad();
+  }, [difficultyFilter, isAuthed, resetAndLoad]);
+
+  useEffect(() => {
+    if (!isAuthed) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !isLoading) {
+          fetchQuestions(offset, false);
+        }
+      },
+      { rootMargin: SCROLL_ROOT_MARGIN },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchQuestions, hasMore, isAuthed, isLoading, offset]);
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -200,21 +316,10 @@ export default function AdminPanel() {
     try {
       const text = await file.text();
       const payloads = parsePayload(JSON.parse(text));
-      const nextRows: QuestionRow[] = [];
-
-      // Обрабатываем каждый payload (может быть массив или один объект)
-      for (const payload of payloads) {
-        for (const question of payload.questions) {
-          nextRows.push({
-            id: createRowId(),
-            difficulty: payload.difficulty,
-            question: question.question,
-            answers: question.answers,
-            correct: question.correct,
-            source: file.name,
-          });
-        }
-      }
+      const importedCount = payloads.reduce(
+        (sum, payload) => sum + payload.questions.length,
+        0,
+      );
 
       const response = await fetch("/api/questions", {
         method: "POST",
@@ -240,9 +345,9 @@ export default function AdminPanel() {
         );
       }
 
-      setRows((prev) => [...nextRows, ...prev]);
+      resetAndLoad();
       setImportSuccess(
-        `Импортировано вопросов: ${nextRows.length} (файл ${file.name}). В БД добавлено: ${data.createdQuestions}.`,
+        `Импортировано вопросов: ${importedCount} (файл ${file.name}). В БД добавлено: ${data.createdQuestions}.`,
       );
     } catch (error) {
       setImportError(
@@ -357,24 +462,60 @@ export default function AdminPanel() {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => setRows([])}
+                onClick={() => {
+                  setRows([]);
+                  setOffset(0);
+                  setHasMore(true);
+                }}
                 disabled={isImporting}
               >
-                Очистить таблицу
+                Сбросить список
               </Button>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Таблица вопросов</CardTitle>
-            <CardDescription>Всего загружено: {rows.length}</CardDescription>
+          <CardHeader className="space-y-4">
+            <div className="space-y-1">
+              <CardTitle>Таблица вопросов</CardTitle>
+              <CardDescription>
+                Загружено: {rows.length}. Показ по частям при скролле.
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="difficulty-filter">Сложность</Label>
+                <Select
+                  value={difficultyFilter}
+                  onValueChange={setDifficultyFilter}
+                >
+                  <SelectTrigger id="difficulty-filter" className="w-[200px]">
+                    <SelectValue placeholder="Все уровни" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все</SelectItem>
+                    <SelectItem value="easy">easy</SelectItem>
+                    <SelectItem value="medium">medium</SelectItem>
+                    <SelectItem value="hard">hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={resetAndLoad}
+                disabled={isLoading}
+              >
+                Обновить список
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
               <TableCaption>
-                Для добавления используйте импорт JSON.
+                Для добавления используйте импорт JSON. Новые данные появятся
+                после импорта или обновления списка.
               </TableCaption>
               <TableHeader>
                 <TableRow>
@@ -389,7 +530,9 @@ export default function AdminPanel() {
                 {rows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center">
-                      Пока нет загруженных вопросов.
+                      {isLoading
+                        ? "Загрузка вопросов..."
+                        : "Пока нет загруженных вопросов."}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -407,16 +550,23 @@ export default function AdminPanel() {
                             <Badge
                               key={`${row.id}-${index}`}
                               variant={
-                                index === row.correct ? "default" : "secondary"
+                                answer.isCorrect ? "default" : "secondary"
                               }
                             >
-                              {index + 1}. {answer}
+                              {index + 1}. {answer.text}
                             </Badge>
                           ))}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="default">{row.correct + 1}</Badge>
+                        <Badge variant="default">
+                          {row.answers
+                            .map((answer, index) =>
+                              answer.isCorrect ? index + 1 : null,
+                            )
+                            .filter((value): value is number => value !== null)
+                            .join(", ") || "—"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="whitespace-normal">
                         {row.source}
@@ -426,6 +576,23 @@ export default function AdminPanel() {
                 )}
               </TableBody>
             </Table>
+            {loadError && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertTitle>Ошибка загрузки</AlertTitle>
+                <AlertDescription>{loadError}</AlertDescription>
+              </Alert>
+            )}
+            <div ref={sentinelRef} className="h-6" />
+            {isLoading && rows.length > 0 && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                Загружаем ещё вопросы...
+              </p>
+            )}
+            {!hasMore && rows.length > 0 && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                Больше вопросов нет.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

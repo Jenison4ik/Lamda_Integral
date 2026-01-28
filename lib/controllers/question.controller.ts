@@ -15,6 +15,9 @@ import {
   ImportQuestionsPayload,
   ImportQuestionsResult,
   ImportQuestionsError,
+  GetQuestionsInput,
+  GetQuestionsResult,
+  GetQuestionsError,
 } from "../types/question.types.js";
 import { ControllerResult } from "../types/common.types.js";
 import { AppError, ValidationError } from "../errors/app.errors.js";
@@ -165,6 +168,76 @@ export async function importQuestions(
     return {
       status: 500,
       data: { ok: false, error: "Не удалось импортировать вопросы" },
+    };
+  }
+}
+
+const parseNumberParam = (
+  value: unknown,
+  fallback: number,
+  label: string,
+): number => {
+  if (value == null || value === "") {
+    return fallback;
+  }
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new ValidationError(
+      `Параметр ${label} должен быть целым числом >= 0.`,
+    );
+  }
+  return parsed;
+};
+
+/**
+ * Получение списка вопросов с пагинацией
+ */
+export async function getQuestions(
+  input: GetQuestionsInput,
+): Promise<ControllerResult<GetQuestionsResult | GetQuestionsError>> {
+  try {
+    const limit = parseNumberParam(input.limit, 30, "limit");
+    const offset = parseNumberParam(input.offset, 0, "offset");
+    const difficulty =
+      typeof input.difficulty === "string" && input.difficulty.trim()
+        ? input.difficulty.trim()
+        : undefined;
+
+    const questions = await questionService.getQuestions({
+      difficulty,
+      limit,
+      offset,
+    });
+
+    return {
+      status: 200,
+      data: {
+        ok: true,
+        questions,
+        nextOffset: offset + questions.length,
+        hasMore: questions.length === limit,
+      },
+    };
+  } catch (error) {
+    console.error("getQuestions error:", error);
+
+    if (error instanceof ValidationError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+
+    if (error instanceof AppError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+
+    return {
+      status: 500,
+      data: { ok: false, error: "Не удалось получить вопросы" },
     };
   }
 }
