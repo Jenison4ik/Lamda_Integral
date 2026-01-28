@@ -1,21 +1,21 @@
 # TG Integral App 2.0
 
-Телеграм‑бот и веб‑клиент для тренировки интегралов. Фронтенд на Vite, backend — serverless функции для Vercel.
+Телеграм‑бот и веб‑клиент для тренировки интегралов. Фронтенд — Vite/React, backend — serverless функции Vercel. Prisma используется с Turso (libSQL).
 
-## Структура проекта
+## Структура
 
 ```
 .
-├── api/                # Serverless функции для Vercel
-│   ├── index.ts        # API эндпоинты (/api/health, /api/hello, /api/users)
-│   └── bot.ts          # Webhook для Telegram бота
-├── client/             # React фронтенд
+├── api/                # Vercel Serverless Functions
+│   ├── index.ts        # API: /api/health, /api/hello, /api/users
+│   └── bot.ts          # Telegram webhook
+├── client/             # React фронтенд (Vite)
 ├── lib/                # Общие модули (Prisma client)
 ├── prisma/             # Prisma схема и миграции
 │   ├── schema.prisma
 │   └── migrations/
-├── server/             # Локальный Express сервер (dev)
-└── vercel.json         # Настройка Vercel
+├── docs/               # Документация
+└── vercel.json         # Настройки Vercel
 ```
 
 ## Быстрый старт
@@ -26,7 +26,7 @@
 npm install
 ```
 
-2. Создать `.env` из шаблона:
+2. Создать `.env`:
 
 ```bash
 cp .env.template .env
@@ -40,14 +40,14 @@ npm run dev
 
 ## Команды
 
-- `npm run dev` — фронтенд + локальный сервер
-- `npm run dev:client` — только фронтенд
-- `npm run dev:server` — только локальный сервер
-- `npm run build` — сборка
+- `npm run dev` — локальный фронтенд
+- `npm run dev:client` — локальный фронтенд
+- `npm run build` — сборка фронтенда
+- `npm run preview` — превью сборки
 
-## Prisma и Turso
+## Prisma + Turso
 
-Проект использует Prisma + Turso (libSQL). Для runtime подключение идет через adapter (`@prisma/adapter-libsql`) в `lib/prisma.ts`.
+Prisma подключается через адаптер `@prisma/adapter-libsql` в `lib/prisma.ts`.
 
 ### Переменные окружения
 
@@ -59,11 +59,11 @@ TURSO_AUTH_TOKEN="your_turso_auth_token"
 LOCAL_DATABASE_URL="file:./prisma/dev.db"
 ```
 
-### Миграции
+### Миграции (кратко)
 
-Полный гайд смотри в `docs/TURSO_MIGRATIONS.md`. Кратко:
+Полный гайд: `docs/TURSO_MIGRATIONS.md`.
 
-1. Меняем `prisma/schema.prisma`.
+1. Изменяем `prisma/schema.prisma`.
 2. Генерируем миграцию локально:
 
 ```bash
@@ -76,7 +76,7 @@ npx prisma migrate dev --name описание_изменения
 turso db shell DB_NAME < prisma/migrations/<timestamp>_<name>/migration.sql
 ```
 
-4. После изменения схемы запускаем:
+4. Обновляем Prisma Client:
 
 ```bash
 npx prisma generate
@@ -84,6 +84,5 @@ npx prisma generate
 
 ## Vercel
 
-- Функции лежат в `api/`
-- Эндпоинты проксируются через `vercel.json`
-- Webhook бота — `https://<app>.vercel.app/api/bot`
+- Serverless функции: `api/*`
+- Webhook бота: `https://<app>.vercel.app/api/bot`
