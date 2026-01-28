@@ -17,43 +17,37 @@ export interface ImportQuestionsStats {
   createdAnswers: number;
 }
 
-const TRANSACTION_CHUNK_SIZE = 20;
-
 async function importQuestions(
   payloads: ImportQuestionsPayload[],
 ): Promise<ImportQuestionsStats> {
   let createdQuestions = 0;
   let createdAnswers = 0;
 
-  const operations: ReturnType<typeof prisma.question.create>[] = [];
-
   for (const payload of payloads) {
     for (const question of payload.questions) {
       createdQuestions += 1;
       createdAnswers += question.answers.length;
 
-      const data = {
-        difficulty: payload.difficulty,
-        text: question.question,
-        answerOptions: {
-          create: question.answers.map((answer, index) => ({
+      await prisma.$transaction(async (tx) => {
+        // В некоторых окружениях типы Prisma клиента могут быть не синхронизированы
+        // со схемой, поэтому используем any для операций импорта.
+        const txAny = tx as any;
+        const created = await txAny.question.create({
+          data: {
+            difficulty: payload.difficulty,
+            text: question.question,
+          },
+        });
+
+        await txAny.answerOption.createMany({
+          data: question.answers.map((answer, index) => ({
+            questionId: created.id,
             text: answer,
             isCorrect: index === question.correct,
           })),
-        },
-      } as unknown as Parameters<typeof prisma.question.create>[0]["data"];
-
-      operations.push(prisma.question.create({ data }));
-
-      if (operations.length >= TRANSACTION_CHUNK_SIZE) {
-        await prisma.$transaction(operations);
-        operations.length = 0;
-      }
+        });
+      });
     }
-  }
-
-  if (operations.length > 0) {
-    await prisma.$transaction(operations);
   }
 
   return { createdQuestions, createdAnswers };
