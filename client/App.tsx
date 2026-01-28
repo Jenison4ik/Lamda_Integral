@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { init } from "@tma.js/sdk-react";
+import { init, retrieveRawInitData } from "@tma.js/sdk-react";
 import NonTg from "./pages/NonTg";
 import { hapticFeedback, useRawInitData } from "@tma.js/sdk-react";
 import { Button } from "./components/ui/button";
@@ -20,7 +20,8 @@ function App() {
   } catch (e) {
     return <NonTg />;
   }
-  const user = useRawInitData();
+  const user = retrieveRawInitData();
+  const user2 = useRawInitData()
 
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -128,10 +129,16 @@ function App() {
       </main>
       <div>
         <p>Информация о пользователе</p>
-        {JSON.stringify(user)}
+        <RowRender>{JSON.stringify(user)}</RowRender>
+        <RowRender>{JSON.stringify(user2)}</RowRender>
       </div>
     </div>
   );
 }
 
 export default App;
+
+
+function RowRender({children}:{children: React.ReactNode}) {
+  return <div style={{maxWidth:"90%"}}>{children}</div>
+}
