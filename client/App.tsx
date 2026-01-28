@@ -3,6 +3,7 @@ import { init, retrieveLaunchParams } from "@tma.js/sdk-react";
 import NonTg from "./pages/NonTg";
 import { hapticFeedback } from "@tma.js/sdk-react";
 import { Button } from "./components/ui/button";
+import { Slider } from "./components/ui/slider";
 
 interface ApiResponse {
   message: string;
@@ -132,6 +133,7 @@ function App() {
           {addUserError && <p className="error" style={{ marginTop: "0.5rem" }}>{addUserError}</p>}
           {addUserSuccess && <p style={{ marginTop: "0.5rem", color: "var(--success, green)" }}>{addUserSuccess}</p>}
         </div>
+        <Slider onValueChange={()=>{hapticFeedback.isSupported() && hapticFeedback.impactOccurred("medium");}} min={0} max={100} defaultValue={[20]} step={10}/>
       </main>
       <div>
         <p>Информация о пользователе</p>
