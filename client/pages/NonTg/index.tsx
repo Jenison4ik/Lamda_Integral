@@ -21,8 +21,8 @@ export default function NonTg() {
         />
       </div>
       <div className="relative flex flex-col items-center justify-center gap-4 h-full w-full">
-        <h1 className="font-bold text-6xl">Lamda Integrall</h1>
-        <p>
+        <h1 className="font-bold text-6xl text-center">Lamda Integrall</h1>
+        <p className="text-center">
           Это телеграм бот для тренировки по интегрированию, вы можете
           опробовать его прямо сейчас
         </p>
