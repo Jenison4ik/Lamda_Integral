@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { init, retrieveLaunchParams } from "@tma.js/sdk-react";
-import NonTg from "./pages/NonTg";
+import { useState, useEffect, useMemo, Suspense, lazy } from "react";
+import { init, retrieveLaunchParams, viewport } from "@tma.js/sdk-react";
 import { hapticFeedback, swipeBehavior } from "@tma.js/sdk-react";
 import { Button } from "./components/ui/button";
 import { Slider } from "./components/ui/slider";
@@ -11,6 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./components/ui/select";
+
+// Ленивая загрузка страниц для разделения на отдельные бандлы
+const AdminPanel = lazy(() => import("./pages/Admin"));
+const NonTg = lazy(() => import("./pages/NonTg"));
 
 interface ApiResponse {
   message: string;
@@ -28,10 +31,38 @@ interface CreateUserResponse {
 }
 
 function App() {
+  const isAdminRoute =
+    typeof window !== "undefined" &&
+    window.location.pathname.startsWith("/admin");
+
+  if (isAdminRoute) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+            <p>Загрузка админ-панели...</p>
+          </div>
+        }
+      >
+        <AdminPanel />
+      </Suspense>
+    );
+  }
+
   try {
     init();
   } catch (e) {
-    return <NonTg />;
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+            <p>Загрузка...</p>
+          </div>
+        }
+      >
+        <NonTg />
+      </Suspense>
+    );
   }
 
   // Получаем параметры запуска, которые содержат данные пользователя
@@ -54,7 +85,17 @@ function App() {
     fetchMessage();
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
-    return swipeBehavior.unmount();
+
+    viewport.mount();
+    viewport.expand();
+    return () => {
+      swipeBehavior.unmount();
+      try {
+        (viewport as any).unmount(); // почему то нет метода, но в документации есть -> https://docs.telegram-mini-apps.com/packages/tma-js-sdk/features/viewport
+      } catch (e) {
+        console.error(e);
+      }
+    };
   }, []);
 
   const fetchMessage = async () => {

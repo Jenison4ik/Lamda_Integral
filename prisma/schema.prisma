@@ -45,26 +45,41 @@ model QuizSession {
 
 model Question {
   id            Int              @id @default(autoincrement())
-  difficulty    String
-  content       Json
-  correctIndex  Int
+  difficulty    String           // "easy", "medium", "hard"
+  text          String           // Текст вопроса (интеграл)
   createdAt     DateTime         @default(now())
 
-  answers       SessionAnswer[]
+  answerOptions AnswerOption[]
 
   @@map("questions")
 }
 
-model SessionAnswer {
-  id           Int          @id @default(autoincrement())
-  sessionId    Int
-  questionId   Int
-  chosenAnswer Int
-  isCorrect    Boolean
-  answeredAt   DateTime     @default(now())
+model AnswerOption {
+  id          Int              @id @default(autoincrement())
+  questionId  Int
+  text        String           // Текст варианта ответа
+  isCorrect   Boolean          @default(false)
 
-  session      QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  question     Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  question    Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  chosenIn     SessionAnswer[]
+
+  @@map("answer_options")
+}
+
+model SessionAnswer {
+  id              Int          @id @default(autoincrement())
+  sessionId       Int
+  questionId      Int          // Для уникальности и быстрых запросов
+  chosenOptionId  Int          // ID выбранного варианта ответа
+  isCorrect       Boolean
+  answeredAt      DateTime     @default(now())
+
+  session         QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  chosenOption    AnswerOption @relation(fields: [chosenOptionId], references: [id], onDelete: Cascade)
+  // Вопрос можно получить через chosenOption.question, но questionId нужен для:
+  // 1. Уникальности ответа на вопрос в сессии [sessionId, questionId]
+  // 2. Быстрых запросов без JOIN
+  // 3. Валидации (проверка, что chosenOption принадлежит questionId)
 
   @@unique([sessionId, questionId])
   @@map("session_answers")

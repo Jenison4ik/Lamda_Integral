@@ -24,9 +24,17 @@ CREATE TABLE "quiz_sessions" (
 CREATE TABLE "questions" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "difficulty" TEXT NOT NULL,
-    "content" JSONB NOT NULL,
-    "correctIndex" INTEGER NOT NULL,
+    "text" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "answer_options" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "questionId" INTEGER NOT NULL,
+    "text" TEXT NOT NULL,
+    "isCorrect" BOOLEAN NOT NULL DEFAULT false,
+    CONSTRAINT "answer_options_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "questions" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -34,11 +42,11 @@ CREATE TABLE "session_answers" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "sessionId" INTEGER NOT NULL,
     "questionId" INTEGER NOT NULL,
-    "chosenAnswer" INTEGER NOT NULL,
+    "chosenOptionId" INTEGER NOT NULL,
     "isCorrect" BOOLEAN NOT NULL,
     "answeredAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "session_answers_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "quiz_sessions" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "session_answers_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "questions" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "session_answers_chosenOptionId_fkey" FOREIGN KEY ("chosenOptionId") REFERENCES "answer_options" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateIndex
