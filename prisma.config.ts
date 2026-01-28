@@ -3,15 +3,15 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-// Для migrate используй LOCAL_DATABASE_URL (file:./server/prisma/dev.db).
+// Для migrate используй LOCAL_DATABASE_URL (file:./prisma/dev.db).
 // Иначе — DATABASE_URL (Turso). См. docs/TURSO_MIGRATIONS.md
 const dbUrl =
   process.env["LOCAL_DATABASE_URL"] ?? process.env["DATABASE_URL"] ?? "";
 
 export default defineConfig({
-  schema: "server/prisma/schema.prisma",
+  schema: "prisma/schema.prisma",
   migrations: {
-    path: "server/prisma/migrations",
+    path: "prisma/migrations",
   },
   datasource: {
     url: dbUrl,

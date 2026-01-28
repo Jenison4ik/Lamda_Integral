@@ -24,7 +24,7 @@ brew install tursodatabase/tap/turso
 
 ```env
 # Для prisma migrate dev (обязательно при работе с миграциями)
-LOCAL_DATABASE_URL="file:./server/prisma/dev.db"
+LOCAL_DATABASE_URL="file:./prisma/dev.db"
 
 # Turso — для приложения (Prisma Client через адаптер)
 DATABASE_URL="libsql://your-db.aws-eu-west-1.turso.io"
@@ -42,14 +42,14 @@ TURSO_AUTH_TOKEN="your_turso_auth_token"
 Убедись, что в `.env` есть:
 
 ```env
-LOCAL_DATABASE_URL="file:./server/prisma/dev.db"
+LOCAL_DATABASE_URL="file:./prisma/dev.db"
 ```
 
 Тогда `prisma.config` возьмёт именно его для `migrate` и других CLI-команд.
 
 ### Шаг 2: Создать миграцию локально
 
-Меняешь `server/prisma/schema.prisma`, потом:
+Меняешь `prisma/schema.prisma`, потом:
 
 ```bash
 npx prisma migrate dev --name описание_изменения
@@ -63,8 +63,8 @@ npx prisma migrate dev --name add_users_table
 
 Так Prisma:
 
-- создаст/обновит `server/prisma/dev.db`;
-- положит SQL в `server/prisma/migrations/<timestamp>_<name>/migration.sql`;
+- создаст/обновит `prisma/dev.db`;
+- положит SQL в `prisma/migrations/<timestamp>_<name>/migration.sql`;
 - применит миграцию к локальной SQLite.
 
 ### Шаг 3: Применить миграцию в Turso
@@ -78,20 +78,20 @@ turso db list
 Применение **одной** миграции (подставь свой `DB_NAME` и путь к `migration.sql`):
 
 ```bash
-turso db shell DB_NAME < server/prisma/migrations/20250128120000_add_users_table/migration.sql
+turso db shell DB_NAME < prisma/migrations/20250128120000_add_users_table/migration.sql
 ```
 
 Пример для базы `lambda-db-jenison4ik`:
 
 ```bash
-turso db shell lambda-db-jenison4ik < server/prisma/migrations/20250128120000_add_users_table/migration.sql
+turso db shell lambda-db-jenison4ik < prisma/migrations/20250128120000_add_users_table/migration.sql
 ```
 
 Несколько миграций — применяй по очереди в хронологическом порядке (по timestamp в имени папки):
 
 ```bash
-turso db shell DB_NAME < server/prisma/migrations/20250128120000_init/migration.sql
-turso db shell DB_NAME < server/prisma/migrations/20250128130000_add_sessions/migration.sql
+turso db shell DB_NAME < prisma/migrations/20250128120000_init/migration.sql
+turso db shell DB_NAME < prisma/migrations/20250128130000_add_sessions/migration.sql
 ```
 
 ### Шаг 4: Сгенерировать Prisma Client
@@ -109,7 +109,7 @@ npx prisma generate
 Если хочешь накатить одну последнюю миграцию без копирования пути:
 
 ```bash
-LATEST=$(ls -t server/prisma/migrations/*/migration.sql | head -1)
+LATEST=$(ls -t prisma/migrations/*/migration.sql | head -1)
 turso db shell DB_NAME < "$LATEST"
 ```
 
@@ -145,14 +145,14 @@ turso db shell DB_NAME < "$LATEST"
    Если база пустая, сначала примени `init`-миграцию (самую раннюю), затем остальные.
 
 5. **`dev.db`**  
-   Файл `server/prisma/dev.db` добавлен в `.gitignore` — не коммитить.
+   Файл `prisma/dev.db` добавлен в `.gitignore` — не коммитить.
 
 ---
 
 ## 5. Краткий чеклист
 
 - [ ] Установлен Turso CLI, выполнен `turso auth login`
-- [ ] В `.env` задан `LOCAL_DATABASE_URL="file:./server/prisma/dev.db"`
+- [ ] В `.env` задан `LOCAL_DATABASE_URL="file:./prisma/dev.db"`
 - [ ] В `prisma.config` для migrate используется `LOCAL_DATABASE_URL` (при наличии)
 - [ ] Меняешь схему → `prisma migrate dev --name ...` → смотришь `migrations/.../migration.sql`
 - [ ] Применяешь: `turso db shell DB_NAME < .../migration.sql`
