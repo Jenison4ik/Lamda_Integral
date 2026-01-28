@@ -20,7 +20,6 @@
       "@/*": ["./client/*"]
     }
   },
-  "include": ["client"],
-  "references": [{ "path": "./server" }]
+  "include": ["client/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
-

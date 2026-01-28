@@ -4,14 +4,12 @@
   "type": "module",
   "scripts": {
     "postinstall": "prisma generate",
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev": "vite",
     "dev:client": "vite",
-    "dev:server": "tsx watch server/index.ts",
-    "build": "npm run build:client && npm run build:server",
+    "build": "npm run build:client",
     "build:client": "vite build",
-    "build:server": "tsc --project server/tsconfig.json",
     "preview": "vite preview",
-    "start": "node server/dist/index.js"
+    "start": "vite preview"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",
