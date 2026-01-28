@@ -38,10 +38,20 @@ function App() {
     setError(null);
     try {
       const response = await fetch("/api/hello");
+      const text = await response.text();
+      let data: ApiResponse;
+      try {
+        data = text ? JSON.parse(text) : { message: "" };
+      } catch {
+        throw new Error(
+          response.ok
+            ? "Сервер вернул не JSON"
+            : `Сервер вернул ${response.status}. Убедитесь, что бэкенд запущен (npm run dev).`,
+        );
+      }
       if (!response.ok) {
         throw new Error("Failed to fetch");
       }
-      const data: ApiResponse = await response.json();
       setMessage(data.message);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -61,7 +71,17 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
       });
-      const data: CreateUserResponse = await res.json();
+      const text = await res.text();
+      let data: CreateUserResponse;
+      try {
+        data = text ? JSON.parse(text) : { ok: false };
+      } catch {
+        throw new Error(
+          res.ok
+            ? "Сервер вернул не JSON"
+            : `Сервер вернул ${res.status}. Убедитесь, что бэкенд запущен (npm run dev).`,
+        );
+      }
       if (!res.ok || !data.ok) {
         throw new Error(data.error ?? "Ошибка при создании пользователя");
       }
