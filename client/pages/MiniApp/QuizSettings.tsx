@@ -24,7 +24,7 @@ import { MoveRight } from "lucide-react";
 
 
 export default function QuizSettings() {
-  const { setAppState } = useAppContext();
+  const {appState, setAppState } = useAppContext();
   const { hapticTrigger } = useHaptic();
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
   const [numOfQuestions, setNumOfQuestions] = useState(10);
@@ -44,7 +44,7 @@ export default function QuizSettings() {
     const backbtn = backToMenuBtn();
 
     return backbtn();
-  })
+  },[appState])
 
 
   return (
