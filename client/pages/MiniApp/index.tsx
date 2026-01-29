@@ -100,7 +100,7 @@ export default function MiniApp() {
             </Field>
             <Field>
                 <FieldLabel className="whitespace-nowrap font-medium text-2xl">Вариант ответов</FieldLabel>
-            <RadioGroup defaultValue="end">
+            <RadioGroup defaultValue="end" onValueChange={()=>(hapticTrigger("soft"))}>
   <div className="flex items-center gap-3">
     <RadioGroupItem value="every" id="every" />
     <Label htmlFor="every">Ответы после каждого</Label>
