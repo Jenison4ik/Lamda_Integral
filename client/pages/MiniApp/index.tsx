@@ -22,6 +22,7 @@ export default function MiniApp() {
   const { hapticTrigger } = useHaptic();
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
   const [numOfQuestions, setNumOfQuestions] = useState(10);
+  const [inputValue, setInputValue] = useState("10");
 
   //ВЫставление настроек
   useEffect(() => {
@@ -73,11 +74,22 @@ export default function MiniApp() {
                   pattern="[0-9]*"
                   min="5"
                   max="20"
-                  value={numOfQuestions}
+                  value={inputValue}
                   onChange={(e) => {
-                    const value = parseInt(e.target.value) || 5;
-                    const clampedValue = Math.min(Math.max(value, 5), 20);
-                    setNumOfQuestions(clampedValue);
+                    setInputValue(e.target.value);
+                  }}
+                  onBlur={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (isNaN(value) || value < 5) {
+                      setNumOfQuestions(5);
+                      setInputValue("5");
+                    } else if (value > 20) {
+                      setNumOfQuestions(20);
+                      setInputValue("20");
+                    } else {
+                      setNumOfQuestions(value);
+                      setInputValue(value.toString());
+                    }
                   }}
                   placeholder="Количество вопросов"
                   className="w-auto min-w-[80px]"
@@ -90,6 +102,7 @@ export default function MiniApp() {
                 value={[numOfQuestions]}
                 onValueChange={(values) => {
                   setNumOfQuestions(values[0]);
+                  setInputValue(values[0].toString());
                   hapticTrigger("soft");
                 }}
                 className="w-full"
