@@ -1,7 +1,7 @@
 import { Suspense, lazy } from "react";
 import { init } from "@tma.js/sdk-react";
 import MiniApp from "./pages/MiniApp";
-import { error } from "node:console";
+import { AppProvider } from "./providers/AppContex";
 
 // Ленивая загрузка страниц для разделения на отдельные бандлы
 const AdminPanel = lazy(() => import("./pages/Admin"));
@@ -44,7 +44,11 @@ function App() {
 
   // Получаем параметры запуска, которые содержат данные пользователя
 
-  return <MiniApp />;
+  return (
+    <AppProvider>
+      <MiniApp />
+    </AppProvider>
+  );
 }
 
 export default App;
