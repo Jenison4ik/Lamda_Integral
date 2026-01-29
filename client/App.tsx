@@ -29,8 +29,6 @@ function App() {
   try {
     init();
   } catch (e) {
-    if (e instanceof Error) {
-    }
     return (
       <Suspense
         fallback={
