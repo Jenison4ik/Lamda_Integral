@@ -3,6 +3,7 @@ import useHaptic from "@/hooks/useHaptic";
 import { useEffect, useMemo } from "react";
 import { retrieveLaunchParams, swipeBehavior, viewport } from "@tma.js/sdk-react";
 import { Card } from "@/components/ui/card";
+import "./style.css"
 
 export default function MiniApp(){
     const { hapticTrigger } = useMemo(()=>  useHaptic(),[]);
@@ -28,7 +29,9 @@ export default function MiniApp(){
 
     return (
         <AppProvider>
+            <main>
             <Card><div>Ваш контент здесь</div></Card>
+            </main>
         </AppProvider>
     )
 }
