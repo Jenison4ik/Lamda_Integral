@@ -1,11 +1,11 @@
 import { Suspense, lazy } from "react";
-import { init} from "@tma.js/sdk-react";
+import { init } from "@tma.js/sdk-react";
 import MiniApp from "./pages/MiniApp";
+import { error } from "node:console";
 
 // Ленивая загрузка страниц для разделения на отдельные бандлы
 const AdminPanel = lazy(() => import("./pages/Admin"));
 const NonTg = lazy(() => import("./pages/NonTg"));
-
 
 function App() {
   const isAdminRoute =
@@ -29,6 +29,8 @@ function App() {
   try {
     init();
   } catch (e) {
+    if (e instanceof Error) {
+    }
     return (
       <Suspense
         fallback={
@@ -44,7 +46,7 @@ function App() {
 
   // Получаем параметры запуска, которые содержат данные пользователя
 
-  return <MiniApp/>
+  return <MiniApp />;
 }
 
 export default App;
