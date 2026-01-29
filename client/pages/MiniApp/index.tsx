@@ -1,6 +1,6 @@
 import { AppProvider } from "@/providers/AppContex";
 import useHaptic from "@/hooks/useHaptic";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   retrieveLaunchParams,
   swipeBehavior,
@@ -13,14 +13,13 @@ import {
     FieldDescription,
     FieldGroup,
     FieldLabel,
-    FieldLegend,
-    FieldSeparator,
-    FieldSet,
   } from "@/components/ui/field"
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 export default function MiniApp() {
   const { hapticTrigger } = useHaptic();
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
+  const [numOfQuestions, setNumOfQuestions] = useState(10);
 
   //ВЫставление настроек
   useEffect(() => {
@@ -38,6 +37,7 @@ export default function MiniApp() {
       }
     };
   }, []);
+
 
   return (
     <AppProvider>
@@ -58,20 +58,45 @@ export default function MiniApp() {
           </CardHeader>
           <CardContent>
             <div>Ваш контент здесь</div>
+          <FieldGroup>
             <Field>
-      <FieldLabel htmlFor="input-field-username">Колличество вопросов</FieldLabel>
-      <Input
-        id="input-field-username"
-        type="number"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        min="1"
-        placeholder="Enter your username"
-      />
-      <FieldDescription>
-        Выберите колличество вопросов которые будут в тесте
-      </FieldDescription>
-    </Field>
+              <div className="flex items-center gap-3 mb-3">
+                <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap">
+                  Количество вопросов
+                </FieldLabel>
+                <Input
+                  id="input-field-num-of-questions"
+                  type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  min="5"
+                  max="20"
+                  value={numOfQuestions}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 5;
+                    const clampedValue = Math.min(Math.max(value, 5), 20);
+                    setNumOfQuestions(clampedValue);
+                  }}
+                  placeholder="Количество вопросов"
+                  className="w-auto min-w-[80px]"
+                />
+              </div>
+              <Slider 
+                min={5} 
+                max={20} 
+                step={1} 
+                value={[numOfQuestions]}
+                onValueChange={(values) => {
+                  setNumOfQuestions(values[0]);
+                  hapticTrigger("soft");
+                }}
+                className="w-full"
+              />
+              <FieldDescription>
+                Минимум 5, максимум 20
+              </FieldDescription>
+            </Field>
+          </FieldGroup>
           </CardContent>
         </Card>
       </main>
