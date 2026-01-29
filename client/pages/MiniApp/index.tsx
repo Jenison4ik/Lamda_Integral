@@ -130,18 +130,19 @@ export default function MiniApp() {
 </RadioGroup>
             </Field>
           </FieldGroup>
-          <Button 
-            className="w-full mt-4 bg-accent text-accent-foreground hover:bg-accent/90"
+          
+          </CardContent>
+        </Card>
+        <Button 
+            className="w-full mt-4 bg-primary text-accent-foreground hover:bg-accent/90 text-lg font-semibold"
             onClick={() => {
               hapticTrigger("medium");
               // TODO: добавить логику отправки формы
             }}
           >
             Поехали
-            <MoveRight />
+            <MoveRight scale={15}/>
           </Button>
-          </CardContent>
-        </Card>
       </main>
     </AppProvider>
   );
