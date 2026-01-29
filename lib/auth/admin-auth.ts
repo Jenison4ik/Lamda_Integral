@@ -1,4 +1,4 @@
-import * as jwt from "jsonwebtoken";
+import { sign, verify, type JwtPayload } from "jsonwebtoken";
 
 export const ADMIN_TOKEN_EXPIRES_SECONDS = 60 * 60 * 12; // 12 часов
 
@@ -11,7 +11,7 @@ export function signAdminToken(secret: string): {
   expiresIn: number;
 } {
   const payload: AdminTokenPayload = { role: "admin" };
-  const token = jwt.sign(payload, secret, {
+  const token = sign(payload, secret, {
     expiresIn: ADMIN_TOKEN_EXPIRES_SECONDS,
   });
 
@@ -22,7 +22,7 @@ export function verifyAdminToken(
   token: string,
   secret: string,
 ): AdminTokenPayload {
-  const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
+  const decoded = verify(token, secret) as JwtPayload;
   if (!decoded || decoded.role !== "admin") {
     throw new Error("INVALID_TOKEN");
   }
