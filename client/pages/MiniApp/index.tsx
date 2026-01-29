@@ -63,6 +63,9 @@ export default function MiniApp() {
       <Input
         id="input-field-username"
         type="number"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        min="1"
         placeholder="Enter your username"
       />
       <FieldDescription>
