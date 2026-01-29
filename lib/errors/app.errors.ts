@@ -10,10 +10,10 @@ export class AppError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly statusCode: number = 500
+    public readonly statusCode: number = 500,
   ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
   }
 }
 
@@ -24,10 +24,10 @@ export class UniqueConstraintError extends AppError {
   constructor(field: string, message?: string) {
     super(
       message || `Запись с таким ${field} уже существует`,
-      'UNIQUE_CONSTRAINT',
-      409
+      "UNIQUE_CONSTRAINT",
+      409,
     );
-    this.name = 'UniqueConstraintError';
+    this.name = "UniqueConstraintError";
   }
 }
 
@@ -36,8 +36,8 @@ export class UniqueConstraintError extends AppError {
  */
 export class ValidationError extends AppError {
   constructor(message: string) {
-    super(message, 'VALIDATION_ERROR', 400);
-    this.name = 'ValidationError';
+    super(message, "VALIDATION_ERROR", 400);
+    this.name = "ValidationError";
   }
 }
 
@@ -46,8 +46,18 @@ export class ValidationError extends AppError {
  */
 export class NotFoundError extends AppError {
   constructor(resource: string) {
-    super(`${resource} не найден`, 'NOT_FOUND', 404);
-    this.name = 'NotFoundError';
+    super(`${resource} не найден`, "NOT_FOUND", 404);
+    this.name = "NotFoundError";
+  }
+}
+
+/**
+ * Ошибка авторизации
+ */
+export class UnauthorizedError extends AppError {
+  constructor(message: string = "Нет доступа") {
+    super(message, "UNAUTHORIZED", 401);
+    this.name = "UnauthorizedError";
   }
 }
 
@@ -57,9 +67,8 @@ export class NotFoundError extends AppError {
 export function isPrismaUniqueConstraintError(error: unknown): boolean {
   return (
     error !== null &&
-    typeof error === 'object' &&
-    'code' in error &&
-    (error as { code: string }).code === 'P2002'
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code: string }).code === "P2002"
   );
 }
-

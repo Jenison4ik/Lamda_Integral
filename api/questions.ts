@@ -16,6 +16,7 @@ import {
   getQuestions,
   importQuestions,
 } from "../lib/controllers/question.controller.js";
+import { verifyAdmin } from "../lib/controllers/auth.controller.js";
 import type {
   ImportQuestionsInput,
   GetQuestionsInput,
@@ -23,12 +24,29 @@ import type {
 
 export const runtime = "nodejs";
 
+function extractToken(req: VercelRequest): string {
+  const header = req.headers.authorization || "";
+  const [type, token] = header.split(" ");
+  if (type !== "Bearer" || !token) {
+    return "";
+  }
+  return token;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const token = extractToken(req);
+  const authResult = await verifyAdmin(token);
+  if (!authResult.data.ok) {
+    return res.status(authResult.status).json(authResult.data);
+  }
+
   if (req.method === "GET") {
     const rawLimit =
       typeof req.query.limit === "string" ? Number(req.query.limit) : undefined;
     const rawOffset =
-      typeof req.query.offset === "string" ? Number(req.query.offset) : undefined;
+      typeof req.query.offset === "string"
+        ? Number(req.query.offset)
+        : undefined;
 
     const input: GetQuestionsInput = {
       difficulty:

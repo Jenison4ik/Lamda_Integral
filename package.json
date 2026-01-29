@@ -29,7 +29,11 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "grammy": "^1.39.3",
+<<<<<<< HEAD
     "katex": "^0.16.28",
+=======
+    "jsonwebtoken": "^9.0.3",
+>>>>>>> 33a7e48a8d9562f7a5b48ed1c4f3aa415ade2375
     "lucide-react": "^0.563.0",
     "ogl": "^1.0.11",
     "react-icons": "^5.5.0",
@@ -40,6 +44,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.10",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
