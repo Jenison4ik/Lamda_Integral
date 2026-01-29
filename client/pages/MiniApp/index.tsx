@@ -34,7 +34,7 @@ export default function MiniApp() {
     <AppProvider>
       <main>
         <Card>
-          <CardHeader className="flex items-start gap-2">
+          <CardHeader className="flex items-center gap-2 ">
             <img
               src={
                 launchParams?.tgWebAppData?.user?.photo_url ??
