@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import "./style.css"
 
 export default function MiniApp(){
-    const { hapticTrigger } = useMemo(()=>  useHaptic(),[]);
+    const { hapticTrigger } = useHaptic();
     const launchParams = useMemo(() => retrieveLaunchParams(), []);
 
     //ВЫставление настроек

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { hapticFeedback } from "@tma.js/sdk-react";
 
 interface UseHapticProps {
@@ -5,11 +6,11 @@ interface UseHapticProps {
 }
 
 export default function useHaptic() {
-  const hapticTrigger = (type: UseHapticProps["type"] = "none") => {
+  const hapticTrigger = useCallback((type: UseHapticProps["type"] = "none") => {
     if (type !== "none" && hapticFeedback.isSupported()) {
       hapticFeedback.impactOccurred(type);
     }
-  };
+  }, []);
 
   return { hapticTrigger };
 }
