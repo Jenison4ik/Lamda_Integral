@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@radix-ui/react-label";
+import { Separator } from "@radix-ui/react-separator";
 export default function MiniApp() {
   const { hapticTrigger } = useHaptic();
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
@@ -60,11 +61,11 @@ export default function MiniApp() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div>Ваш контент здесь</div>
+            <div>Выбери параметры квиза и приступай к решению интегралов</div>
           <FieldGroup>
             <Field>
               <div className="flex items-center gap-3 mb-3">
-                <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap font-bold text-lg">
+                <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap font-semibold    text-lg">
                   Количество вопросов
                 </FieldLabel>
                 <Input
@@ -111,8 +112,10 @@ export default function MiniApp() {
                 Минимум 5, максимум 20
               </FieldDescription>
             </Field>
+
+            <Separator/>
             <Field>
-                <FieldLabel className="whitespace-nowrap font-bold text-lg">Вариант ответов</FieldLabel>
+                <FieldLabel className="whitespace-nowrap font-semibold text-lg">Вариант ответов</FieldLabel>
             <RadioGroup defaultValue="end" onValueChange={()=>(hapticTrigger("soft"))}>
   <div className="flex items-center gap-3">
     <RadioGroupItem value="every" id="every" />
