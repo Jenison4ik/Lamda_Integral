@@ -8,7 +8,16 @@ import {
 } from "@tma.js/sdk-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import "./style.css";
-
+import {
+    Field,
+    FieldDescription,
+    FieldGroup,
+    FieldLabel,
+    FieldLegend,
+    FieldSeparator,
+    FieldSet,
+  } from "@/components/ui/field"
+import { Input } from "@/components/ui/input";
 export default function MiniApp() {
   const { hapticTrigger } = useHaptic();
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
@@ -49,6 +58,17 @@ export default function MiniApp() {
           </CardHeader>
           <CardContent>
             <div>Ваш контент здесь</div>
+            <Field>
+      <FieldLabel htmlFor="input-field-username">Колличество вопросов</FieldLabel>
+      <Input
+        id="input-field-username"
+        type="number"
+        placeholder="Enter your username"
+      />
+      <FieldDescription>
+        Выберите колличество вопросов которые будут в тесте
+      </FieldDescription>
+    </Field>
           </CardContent>
         </Card>
       </main>
