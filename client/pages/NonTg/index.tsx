@@ -27,7 +27,7 @@ export default function NonTg() {
         <Button
           onClick={handleClick}
           className={
-            "gap-2 w-auto cursor-pointer hover:scale-105 transition-all duration-300 bg-primary text-white hover:text-black hover:bg-white/80"
+            "gap-2 w-auto cursor-pointer hover:scale-105 transition-all duration-300 bg-primary text-white"
           }
         >
         <img src="./img/telegram.svg" alt="" className="w-[15px] h-auto"/>
