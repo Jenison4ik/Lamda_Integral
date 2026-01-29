@@ -239,9 +239,9 @@ function App() {
           defaultValue={[20]}
           step={10}
         />
-        <h2>Some LaTeX Render Exaples</h2>
+        <h2>Some LaTeX Render Examples</h2>
         <MathBlock formula="\int \frac{dx}{\sqrt{1 + x^2}}"/>
-        <MathBlock formula="\int \frac{dx}{\sqrt{1 + x^2}"/>
+        <MathBlock formula="\int \frac{dx}{\sqrt{1 + x^2}}"/>
         <MathBlock formula="\int \frac{dx}{\sqrt{(\ln x)^2 + 1}} \cdot \frac{1}{x}"/>
       </main>
       <div>
