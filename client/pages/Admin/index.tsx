@@ -254,7 +254,7 @@ export default function AdminPanel() {
         }));
 
         setRows((prev) => (replace ? mappedRows : [...prev, ...mappedRows]));
-        setOffset(data.nextOffset);
+        //setOffset(data.nextOffset);
         setHasMore(data.hasMore);
       } catch (error) {
         setLoadError(
