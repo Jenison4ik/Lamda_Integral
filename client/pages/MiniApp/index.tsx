@@ -63,7 +63,7 @@ export default function MiniApp() {
           <FieldGroup>
             <Field>
               <div className="flex items-center gap-3 mb-3">
-                <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap font-medium text-2xl">
+                <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap font-bold text-lg">
                   Количество вопросов
                 </FieldLabel>
                 <Input
@@ -99,7 +99,7 @@ export default function MiniApp() {
               </FieldDescription>
             </Field>
             <Field>
-                <FieldLabel className="whitespace-nowrap font-medium text-2xl">Вариант ответов</FieldLabel>
+                <FieldLabel className="whitespace-nowrap font-bold text-lg">Вариант ответов</FieldLabel>
             <RadioGroup defaultValue="end" onValueChange={()=>(hapticTrigger("soft"))}>
   <div className="flex items-center gap-3">
     <RadioGroupItem value="every" id="every" />
