@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./components/ui/select";
+import MathBlock from "./components/MathBlock";
 
 // Ленивая загрузка страниц для разделения на отдельные бандлы
 const AdminPanel = lazy(() => import("./pages/Admin"));
@@ -238,6 +239,10 @@ function App() {
           defaultValue={[20]}
           step={10}
         />
+        <h2>Some LaTeX Render Exaples</h2>
+        <MathBlock formula="\int \frac{dx}{\sqrt{1 + x^2}}"/>
+        <MathBlock formula="\int \frac{dx}{\sqrt{1 + x^2}"/>
+        <MathBlock formula="\int \frac{dx}{\sqrt{(\ln x)^2 + 1}} \cdot \frac{1}{x}"/>
       </main>
       <div>
         <p>Информация о пользователе</p>
