@@ -16,6 +16,8 @@ import {
   } from "@/components/ui/field"
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@radix-ui/react-label";
 export default function MiniApp() {
   const { hapticTrigger } = useHaptic();
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
@@ -61,7 +63,7 @@ export default function MiniApp() {
           <FieldGroup>
             <Field>
               <div className="flex items-center gap-3 mb-3">
-                <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap">
+                <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap font-medium text-2xl">
                   Количество вопросов
                 </FieldLabel>
                 <Input
@@ -95,6 +97,19 @@ export default function MiniApp() {
               <FieldDescription>
                 Минимум 5, максимум 20
               </FieldDescription>
+            </Field>
+            <Field>
+                <FieldLabel className="whitespace-nowrap font-medium text-2xl">Вариант ответов</FieldLabel>
+            <RadioGroup defaultValue="end">
+  <div className="flex items-center gap-3">
+    <RadioGroupItem value="every" id="every" />
+    <Label htmlFor="every">Ответы после каждого</Label>
+  </div>
+  <div className="flex items-center gap-3">
+    <RadioGroupItem value="end" id="end" />
+    <Label htmlFor="end">Результат в конце</Label>
+  </div>
+</RadioGroup>
             </Field>
           </FieldGroup>
           </CardContent>
