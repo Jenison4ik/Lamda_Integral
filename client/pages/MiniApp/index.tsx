@@ -33,23 +33,24 @@ export default function MiniApp() {
   return (
     <AppProvider>
       <main>
-        <Card>CardContent</Card>
-        <CardHeader className="flex items-start gap-2">
-          <img
-            src={
-              launchParams?.tgWebAppData?.user?.photo_url ??
-              "./img/user_placeholder.jpeg"
-            }
-            alt="user"
-            className="w-[40px] h-[40px] rounded-full"
-          />
-          <CardTitle>
-            Привет 👋, {launchParams?.tgWebAppData?.user?.first_name}!
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div>Ваш контент здесь</div>
-        </CardContent>
+        <Card>
+          <CardHeader className="flex items-start gap-2">
+            <img
+              src={
+                launchParams?.tgWebAppData?.user?.photo_url ??
+                "./img/user_placeholder.jpeg"
+              }
+              alt="user"
+              className="w-[40px] h-[40px] rounded-full"
+            />
+            <CardTitle>
+              Привет 👋, {launchParams?.tgWebAppData?.user?.first_name}!
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div>Ваш контент здесь</div>
+          </CardContent>
+        </Card>
       </main>
     </AppProvider>
   );
