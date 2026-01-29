@@ -18,7 +18,9 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@radix-ui/react-label";
-import { Separator } from "@radix-ui/react-separator";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { MoveRight } from "lucide-react";
 export default function MiniApp() {
   const { hapticTrigger } = useHaptic();
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
@@ -54,14 +56,14 @@ export default function MiniApp() {
                 "./img/user_placeholder.jpeg"
               }
               alt="user"
-              className="w-[40px] h-[40px] rounded-full"
+              className="w-50px] h-[50px] rounded-full"
             />
-            <CardTitle>
+            <CardTitle className="text-xl">
               Привет 👋, {launchParams?.tgWebAppData?.user?.first_name}!
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div>Выбери параметры квиза и приступай к решению интегралов</div>
+            <p className="text-muted-foreground">Выбери параметры квиза и приступай к решению интегралов</p>
           <FieldGroup>
             <Field>
               <div className="flex items-center gap-3 mb-3">
@@ -128,6 +130,16 @@ export default function MiniApp() {
 </RadioGroup>
             </Field>
           </FieldGroup>
+          <Button 
+            className="w-full mt-4 bg-accent text-accent-foreground hover:bg-accent/90"
+            onClick={() => {
+              hapticTrigger("medium");
+              // TODO: добавить логику отправки формы
+            }}
+          >
+            Поехали
+            <MoveRight />
+          </Button>
           </CardContent>
         </Card>
       </main>
