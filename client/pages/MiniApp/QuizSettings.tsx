@@ -1,7 +1,8 @@
 import { useAppContext } from "@/providers/AppContex";
 import useHaptic from "@/hooks/useHaptic";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  backButton,
   retrieveLaunchParams,
 } from "@tma.js/sdk-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,8 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
 
+
+
 export default function QuizSettings() {
   const { setAppState } = useAppContext();
   const { hapticTrigger } = useHaptic();
@@ -27,6 +30,21 @@ export default function QuizSettings() {
   const [numOfQuestions, setNumOfQuestions] = useState(10);
   const [inputValue, setInputValue] = useState("10");
 
+  function backToMenuBtn(){
+    if(backButton.isSupported()){
+      backButton.mount();
+      backButton.show();
+      backButton.onClick(()=>{setAppState("main")});
+      return ()=>backButton.unmount()
+    }
+  return ()=>{}
+  }
+
+  useEffect(()=>{
+    const backbtn = backToMenuBtn();
+
+    return backbtn();
+  })
 
 
   return (
