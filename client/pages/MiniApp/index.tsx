@@ -1,4 +1,4 @@
-import { useAppContext } from "@/providers/AppContex";
+import { useAppContext,AppProvider } from "@/providers/AppContex";
 import { useEffect, useMemo, Suspense, lazy } from "react";
 import {
   swipeBehavior,
@@ -50,7 +50,8 @@ export default function MiniApp(){
     }, [appState]);
 
     return (
-      <Suspense
+      <AppProvider>
+        <Suspense
         fallback={
           <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
             <p>Загрузка...</p>
@@ -59,5 +60,6 @@ export default function MiniApp(){
       >
         <StateComponent />
       </Suspense>
+      </AppProvider>
     );
 }
