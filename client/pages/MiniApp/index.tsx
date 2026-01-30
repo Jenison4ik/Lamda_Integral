@@ -65,7 +65,7 @@ export default function MiniApp() {
   }
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={main === null ? <LoadScreen /> : null}>
       <StateComponent />
     </Suspense>
   );
