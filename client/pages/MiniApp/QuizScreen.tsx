@@ -16,9 +16,15 @@ import {
 } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FieldLabel } from "@/components/ui/field";
+import { useState } from "react";
 
 export default function QuizScreen() {
   const { setAppState } = useAppContext();
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+
+  const handleAnswerChange = (value: string) => {
+    setSelectedAnswer(value);
+  };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -32,7 +38,11 @@ export default function QuizScreen() {
       </Card>
       <Card className="w-full max-w-sm">
         <CardContent>
-          <RadioGroup defaultValue="plus" className="max-w-sm">
+          <RadioGroup
+            className="max-w-sm"
+            value={selectedAnswer}
+            onValueChange={handleAnswerChange}
+          >
             <FieldLabel htmlFor="plus-plan">
               <Field orientation="horizontal">
                 <FieldContent>
@@ -74,8 +84,12 @@ export default function QuizScreen() {
           </RadioGroup>
         </CardContent>
       </Card>
-      <Button onClick={() => setAppState("result")} className="w-full max-w-xs">
-        Завершить квиз (заглушка)
+      <Button
+        onClick={() => setAppState("result")}
+        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
+        disabled={!selectedAnswer}
+      >
+        {selectedAnswer ? "Следующий вопрос" : "Выберите ответ"}
       </Button>
     </main>
   );
