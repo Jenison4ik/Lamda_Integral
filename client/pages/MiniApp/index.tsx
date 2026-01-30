@@ -5,8 +5,8 @@ import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
 import "./style.css";
 import LoadScreen from "./LoadScreen";
+import { MainScreenLazy, preloadMainScreen } from "./utils/preloadMainscreen";
 
-const MainScreen = lazy(() => import("./MainScreen"));
 const QuizSettings = lazy(() => import("./QuizSettings"));
 const QuizScreen = lazy(() => import("./QuizScreen"));
 const ResultScreen = lazy(() => import("./ResultScreen"));
@@ -28,9 +28,9 @@ export default function MiniApp() {
   const [uiReady, setUiReady] = useState(false);
 
   useEffect(() => {
-    import("./MainScreen").then(() => {
+    preloadMainScreen().then(() => {
       setUiReady(true);
-      console.log("uiReady ", uiReady);
+      console.log("uiReady ", true); // в колбэке uiReady ещё старое из замыкания — логируем то, что установили
     });
 
     swipeBehavior.mount();
@@ -50,7 +50,7 @@ export default function MiniApp() {
   const StateComponent = useMemo(() => {
     switch (appState) {
       case "main":
-        return MainScreen;
+        return MainScreenLazy;
       case "difficulty-pick":
         return QuizSettings;
       case "quiz":
