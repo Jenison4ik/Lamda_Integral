@@ -22,15 +22,15 @@ export default function QuizScreen() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4">
-      <Card>
+      <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Вопрос 1</CardTitle>
-          <CardContent>
-            <MathBlock formula="\int \frac{dx}{\sqrt{1 - (\ln x)^2}} \cdot \frac{1}{x}" />
-          </CardContent>
         </CardHeader>
+        <CardContent>
+          <MathBlock formula="\int \frac{dx}{\sqrt{1 - (\ln x)^2}} \cdot \frac{1}{x}" />
+        </CardContent>
       </Card>
-      <Card>
+      <Card className="w-full max-w-sm">
         <RadioGroup defaultValue="plus" className="max-w-sm">
           <FieldLabel htmlFor="plus-plan">
             <Field orientation="horizontal">
@@ -39,7 +39,7 @@ export default function QuizScreen() {
                   <MathBlock formula="\arcsin(\ln x) + C" />
                 </FieldTitle>
               </FieldContent>
-              <RadioGroupItem value="plus" id="plus-plan" />
+              <RadioGroupItem value="plus" id="plus-plan" className="hidden" />
             </Field>
           </FieldLabel>
           <FieldLabel htmlFor="pro-plan">
@@ -49,7 +49,7 @@ export default function QuizScreen() {
                   <MathBlock formula="\arccos(\ln x) + C" />
                 </FieldTitle>
               </FieldContent>
-              <RadioGroupItem value="pro" id="pro-plan" />
+              <RadioGroupItem value="pro" id="pro-plan" className="hidden" />
             </Field>
           </FieldLabel>
           <FieldLabel htmlFor="enterprise-plan">
@@ -59,7 +59,11 @@ export default function QuizScreen() {
                   <MathBlock formula="\ln|\ln x + \sqrt{1-(\ln x)^2}| + C" />
                 </FieldTitle>
               </FieldContent>
-              <RadioGroupItem value="enterprise" id="enterprise-plan" />
+              <RadioGroupItem
+                value="enterprise"
+                id="enterprise-plan"
+                className="hidden"
+              />
             </Field>
           </FieldLabel>
         </RadioGroup>
