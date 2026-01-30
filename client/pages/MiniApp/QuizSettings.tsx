@@ -74,24 +74,29 @@ export default function QuizSettings() {
     <main>
       <Card>
         <CardHeader className="flex items-center gap-2 ">
-          <div className="w-[50px] h-[50px] rounded-full shrink-0">
-            {imageLoaded && !imageError ? (
-              <img
-                src={photoUrl}
-                alt="user"
-                className="w-full h-full rounded-full object-cover"
-                onLoad={() => {
-                  console.log("image loaded");
-                  setImageLoaded(true);
-                }}
-                onError={() => {
-                  setImageError(true);
-                  setImageLoaded(false);
-                }}
-              />
-            ) : (
-              <Skeleton className="w-full h-full rounded-full" />
+          <div className="w-[50px] h-[50px] rounded-full shrink-0 relative">
+            {photoUrl && (
+              <>
+                <img
+                  src={photoUrl}
+                  alt="user"
+                  className="w-full h-full rounded-full object-cover"
+                  style={{
+                    opacity: imageLoaded && !imageError ? 1 : 0,
+                    position:
+                      imageLoaded && !imageError ? "relative" : "absolute",
+                  }}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => {
+                    setImageError(true);
+                  }}
+                />
+                {(!imageLoaded || imageError) && (
+                  <Skeleton className="w-full h-full rounded-full absolute inset-0" />
+                )}
+              </>
             )}
+            {!photoUrl && <Skeleton className="w-full h-full rounded-full" />}
           </div>
 
           {showTextSkeleton ? (
