@@ -28,7 +28,7 @@ export default function MiniApp() {
   const { appState } = useAppContext();
   const [uiReady, setUiReady] = useState(false);
   const data = useLaunchParams();
-  const { isReady } = useUsersInit({ payload: { telegramId: data.tgWebAppData?.chat?.id, username: data.tgWebAppData?.chat?.username }, logResult: true });
+  const { isReady } = useUsersInit({ payload: { telegramId: data.tgWebAppData?.user?.id, username: data.tgWebAppData?.user?.username }, logResult: true });
   // Мемоизированный LoadScreen, чтобы использовать один и тот же элемент
   const loadScreenMemo = useMemo(() => <LoadScreen />, []);
 
