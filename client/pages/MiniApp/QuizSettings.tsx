@@ -76,18 +76,21 @@ export default function QuizSettings() {
         <CardHeader className="flex items-center gap-2 ">
           <div className="w-[50px] h-[50px] rounded-full shrink-0">
             {imageLoaded && !imageError ? (
-              <Skeleton className="w-full h-full rounded-full" />
-            ) : (
               <img
                 src={photoUrl}
                 alt="user"
                 className="w-full h-full rounded-full object-cover"
-                onLoad={() => setImageLoaded(true)}
+                onLoad={() => {
+                  console.log("image loaded");
+                  setImageLoaded(true);
+                }}
                 onError={() => {
                   setImageError(true);
                   setImageLoaded(false);
                 }}
               />
+            ) : (
+              <Skeleton className="w-full h-full rounded-full" />
             )}
           </div>
 
