@@ -161,7 +161,7 @@ export default function QuizSettings() {
         disabled={isPending}
       >
         {isPending ? <Spinner /> : "Поехали"}
-        {!isPending && <MoveRight scale={25} />}
+        {!isPending && <MoveRight scale={35} strokeWidth={2.75} />}
       </Button>
     </main>
   );
