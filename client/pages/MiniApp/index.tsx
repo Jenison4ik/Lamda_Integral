@@ -28,7 +28,10 @@ export default function MiniApp() {
   const [uiReady, setUiReady] = useState(false);
 
   useEffect(() => {
-    import("./MainScreen").then(() => setUiReady(true));
+    import("./MainScreen").then(() => {
+      setUiReady(true);
+      console.log("uiReady ", uiReady);
+    });
 
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
