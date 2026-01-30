@@ -1,5 +1,6 @@
 import { useAppContext } from "@/providers/AppContex";
 import { Button } from "@/components/ui/button";
+import { useHaptic } from "@/hooks/useHaptic";
 import MathBlock from "@/components/MathBlock";
 import {
   Card,
@@ -19,10 +20,12 @@ import { FieldLabel } from "@/components/ui/field";
 import { useState } from "react";
 
 export default function QuizScreen() {
+  const { hapticTrigger } = useHaptic();
   const { setAppState } = useAppContext();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
   const handleAnswerChange = (value: string) => {
+    hapticTrigger("soft");
     setSelectedAnswer(value);
   };
 
@@ -85,7 +88,10 @@ export default function QuizScreen() {
         </CardContent>
       </Card>
       <Button
-        onClick={() => setAppState("result")}
+        onClick={() => {
+          hapticTrigger("medium");
+          setAppState("result");
+        }}
         className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
         disabled={!selectedAnswer}
       >
