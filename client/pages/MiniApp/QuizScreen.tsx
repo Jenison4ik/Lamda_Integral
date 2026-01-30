@@ -1,22 +1,72 @@
 import { useAppContext } from "@/providers/AppContex";
 import { Button } from "@/components/ui/button";
 import MathBlock from "@/components/MathBlock";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldTitle,
+} from "@/components/ui/field";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { FieldLabel } from "@/components/ui/field";
 
 export default function QuizScreen() {
   const { setAppState } = useAppContext();
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h1 className="text-3xl font-bold mb-4">Квиз</h1>
-      <MathBlock formula="\int \frac{dx}{\sqrt{(\ln x)^2 + 1}} \cdot \frac{1}{x}"/>
-      <p className="text-muted-foreground mb-6">Экран квиза в разработке</p>
-      <Button 
-        onClick={() => setAppState("result")}
-        className="w-full max-w-xs"
-      >
+      <Card>
+        <CardHeader>
+          <CardTitle>Вопрос 1</CardTitle>
+          <CardContent>
+            <MathBlock formula="\int \frac{dx}{\sqrt{1 - (\ln x)^2}} \cdot \frac{1}{x}" />
+          </CardContent>
+        </CardHeader>
+      </Card>
+      <Card>
+        <RadioGroup defaultValue="plus" className="max-w-sm">
+          <FieldLabel htmlFor="plus-plan">
+            <Field orientation="horizontal">
+              <FieldContent>
+                <FieldTitle>
+                  <MathBlock formula="\arcsin(\ln x) + C" />
+                </FieldTitle>
+              </FieldContent>
+              <RadioGroupItem value="plus" id="plus-plan" />
+            </Field>
+          </FieldLabel>
+          <FieldLabel htmlFor="pro-plan">
+            <Field orientation="horizontal">
+              <FieldContent>
+                <FieldTitle>
+                  <MathBlock formula="\arccos(\ln x) + C" />
+                </FieldTitle>
+              </FieldContent>
+              <RadioGroupItem value="pro" id="pro-plan" />
+            </Field>
+          </FieldLabel>
+          <FieldLabel htmlFor="enterprise-plan">
+            <Field orientation="horizontal">
+              <FieldContent>
+                <FieldTitle>
+                  <MathBlock formula="\ln|\ln x + \sqrt{1-(\ln x)^2}| + C" />
+                </FieldTitle>
+              </FieldContent>
+              <RadioGroupItem value="enterprise" id="enterprise-plan" />
+            </Field>
+          </FieldLabel>
+        </RadioGroup>
+      </Card>
+      <Button onClick={() => setAppState("result")} className="w-full max-w-xs">
         Завершить квиз (заглушка)
       </Button>
     </main>
   );
 }
-
