@@ -1,10 +1,7 @@
 import { useAppContext } from "@/providers/AppContex";
 import useHaptic from "@/hooks/useHaptic";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import {
-  backButton,
-  retrieveLaunchParams,
-} from "@tma.js/sdk-react";
+import { backButton, retrieveLaunchParams } from "@tma.js/sdk-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import "./style.css";
 import {
@@ -12,7 +9,7 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field"
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -22,8 +19,6 @@ import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Skeleton } from "@/components/ui/skeleton";
-
-
 
 export default function QuizSettings() {
   const { setAppState } = useAppContext();
@@ -41,7 +36,6 @@ export default function QuizSettings() {
   const showImageSkeleton = !photoUrl || !imageLoaded || imageError;
   const showTextSkeleton = !hasUserData;
 
-
   function backToMenuBtn() {
     if (backButton.isSupported()) {
       backButton.mount();
@@ -55,26 +49,26 @@ export default function QuizSettings() {
       });
       return () => {
         backButton.hide();
-        backButton.unmount()
-
-      }
+        backButton.unmount();
+      };
     }
-    return () => { }
+    return () => {};
   }
 
   useEffect(() => {
     const backbtn = backToMenuBtn();
 
     return backbtn;
-  }, [])
+  }, []);
 
-  useEffect(() => {//Загрузка аватарки
+  useEffect(() => {
+    //Загрузка аватарки
     if (photoUrl) {
+      console.log("photoUrl", photoUrl);
       setImageLoaded(false);
       setImageError(false);
     }
-  }, [photoUrl])
-
+  }, [photoUrl]);
 
   return (
     <main>
@@ -102,17 +96,20 @@ export default function QuizSettings() {
               <Skeleton className="h-6 w-[200px]" />
             </div>
           ) : (
-            <CardTitle className="text-xl">
-              Привет 👋, {firstName}!
-            </CardTitle>
+            <CardTitle className="text-xl">Привет 👋, {firstName}!</CardTitle>
           )}
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Выбери параметры квиза и приступай к решению интегралов</p>
+          <p className="text-muted-foreground">
+            Выбери параметры квиза и приступай к решению интегралов
+          </p>
           <FieldGroup>
             <Field>
               <div className="flex items-center gap-3 mb-3 justify-between">
-                <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap font-semibold    text-lg">
+                <FieldLabel
+                  htmlFor="input-field-num-of-questions"
+                  className="whitespace-nowrap font-semibold    text-lg"
+                >
                   Количество вопросов
                 </FieldLabel>
                 <Input
@@ -155,18 +152,21 @@ export default function QuizSettings() {
                   hapticTrigger("soft");
                 }}
                 className="w-full"
-
                 disabled={isPending}
               />
-              <FieldDescription>
-                Минимум 5, максимум 20
-              </FieldDescription>
+              <FieldDescription>Минимум 5, максимум 20</FieldDescription>
             </Field>
 
             <Separator />
             <Field>
-              <FieldLabel className="whitespace-nowrap font-semibold text-lg">Вариант ответов</FieldLabel>
-              <RadioGroup defaultValue="end" onValueChange={() => (hapticTrigger("soft"))} disabled={isPending}>
+              <FieldLabel className="whitespace-nowrap font-semibold text-lg">
+                Вариант ответов
+              </FieldLabel>
+              <RadioGroup
+                defaultValue="end"
+                onValueChange={() => hapticTrigger("soft")}
+                disabled={isPending}
+              >
                 <div className="flex items-center gap-3">
                   <RadioGroupItem value="every" id="every" />
                   <Label htmlFor="every">Ответы после каждого</Label>
@@ -178,7 +178,6 @@ export default function QuizSettings() {
               </RadioGroup>
             </Field>
           </FieldGroup>
-
         </CardContent>
       </Card>
       <Button
@@ -187,7 +186,7 @@ export default function QuizSettings() {
           hapticTrigger("medium");
           startTransition(() => {
             setAppState("quiz");
-          })
+          });
         }}
         disabled={isPending}
       >
