@@ -33,7 +33,7 @@ export default function QuizSettings() {
   const photoUrl = launchParams?.tgWebAppData?.user?.photo_url;
   const firstName = launchParams?.tgWebAppData?.user?.first_name;
   const hasUserData = !!firstName;
-  const showImageSkeleton = !photoUrl || !imageLoaded || imageError;
+
   const showTextSkeleton = !hasUserData;
 
   function backToMenuBtn() {
@@ -75,7 +75,7 @@ export default function QuizSettings() {
       <Card>
         <CardHeader className="flex items-center gap-2 ">
           <div className="w-[50px] h-[50px] rounded-full shrink-0">
-            {showImageSkeleton ? (
+            {imageLoaded && !imageError ? (
               <Skeleton className="w-full h-full rounded-full" />
             ) : (
               <img
