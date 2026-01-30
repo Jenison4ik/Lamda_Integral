@@ -11,6 +11,14 @@ const QuizSettings = lazy(() => import("./QuizSettings"));
 const QuizScreen = lazy(() => import("./QuizScreen"));
 const ResultScreen = lazy(() => import("./ResultScreen"));
 
+function FirstLoad() {
+  let count = 0;
+  return function () {
+    count++;
+    return count;
+  };
+}
+
 function FallbackScreen() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -26,11 +34,8 @@ export default function MiniApp() {
   const { appState } = useAppContext();
   const { isReady } = useUsersInit({ logResult: true });
   const [uiReady, setUiReady] = useState(false);
-  const [main, setMain] = useState<any>(null);
-
+  const firstLoad = FirstLoad();
   useEffect(() => {
-    const screen = import("./MainScreen");
-    setMain(lazy(() => screen));
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
     viewport.mount();
@@ -60,12 +65,12 @@ export default function MiniApp() {
     }
   }, [appState]);
 
-  if (!isReady || main === null) {
+  if (!isReady) {
     return <LoadScreen />;
   }
 
   return (
-    <Suspense fallback={main === null ? <LoadScreen /> : null}>
+    <Suspense fallback={firstLoad() === 1 ? <LoadScreen /> : null}>
       <StateComponent />
     </Suspense>
   );
