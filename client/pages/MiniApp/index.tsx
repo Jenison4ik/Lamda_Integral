@@ -5,8 +5,8 @@ import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
 import "./style.css";
 import LoadScreen from "./LoadScreen";
-import { MainScreenLazy, preloadMainScreen } from "./utils/preloadMainscreen";
 
+const MainScreen = lazy(() => import("./MainScreen"));
 const QuizSettings = lazy(() => import("./QuizSettings"));
 const QuizScreen = lazy(() => import("./QuizScreen"));
 const ResultScreen = lazy(() => import("./ResultScreen"));
@@ -26,15 +26,11 @@ export default function MiniApp() {
   const { appState } = useAppContext();
   const { isReady } = useUsersInit({ logResult: true });
   const [uiReady, setUiReady] = useState(false);
+  const [main, setMain] = useState<any>(null);
 
   useEffect(() => {
-    preloadMainScreen().then(() => {
-      setTimeout(() => {
-        setUiReady(true);
-      }, 10);
-      console.log("uiReady ", uiReady); // в колбэке uiReady ещё старое из замыкания — логируем то, что установили
-    });
-
+    const screen = import("./MainScreen");
+    setMain(lazy(() => screen));
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
     viewport.mount();
@@ -52,7 +48,7 @@ export default function MiniApp() {
   const StateComponent = useMemo(() => {
     switch (appState) {
       case "main":
-        return MainScreenLazy;
+        return MainScreen;
       case "difficulty-pick":
         return QuizSettings;
       case "quiz":
@@ -64,7 +60,7 @@ export default function MiniApp() {
     }
   }, [appState]);
 
-  if (!isReady || !uiReady) {
+  if (!isReady || main === null) {
     return <LoadScreen />;
   }
 
