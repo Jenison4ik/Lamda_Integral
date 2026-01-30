@@ -1,6 +1,6 @@
 import { useAppContext } from "@/providers/AppContex";
 import { Button } from "@/components/ui/button";
-import { useHaptic } from "@/hooks/useHaptic";
+import useHaptic from "@/hooks/useHaptic";
 import MathBlock from "@/components/MathBlock";
 import {
   Card,
@@ -30,7 +30,7 @@ export default function QuizScreen() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-4">
+    <main className="flex flex-col items-center justify-center min-h-screen gap-4 ">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Вопрос 1</CardTitle>
@@ -92,7 +92,7 @@ export default function QuizScreen() {
           hapticTrigger("medium");
           setAppState("result");
         }}
-        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
+        className="w-full max-w-sm mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
         disabled={!selectedAnswer}
       >
         {selectedAnswer ? "Следующий вопрос" : "Выберите ответ"}
