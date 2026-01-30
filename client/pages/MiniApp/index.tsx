@@ -29,8 +29,10 @@ export default function MiniApp() {
 
   useEffect(() => {
     preloadMainScreen().then(() => {
-      setUiReady(true);
-      console.log("uiReady ", true); // в колбэке uiReady ещё старое из замыкания — логируем то, что установили
+      setTimeout(() => {
+        setUiReady(true);
+      }, 10);
+      console.log("uiReady ", uiReady); // в колбэке uiReady ещё старое из замыкания — логируем то, что установили
     });
 
     swipeBehavior.mount();
