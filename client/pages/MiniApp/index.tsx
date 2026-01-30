@@ -6,19 +6,13 @@ import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 import "./style.css";
 import LoadScreen from "./LoadScreen";
 
+// Lazy-загрузка экранов
 const MainScreen = lazy(() => import("./MainScreen"));
 const QuizSettings = lazy(() => import("./QuizSettings"));
 const QuizScreen = lazy(() => import("./QuizScreen"));
 const ResultScreen = lazy(() => import("./ResultScreen"));
 
-function FirstLoad() {
-  let count = 0;
-  return function () {
-    count++;
-    return count;
-  };
-}
-
+// Фолбэк для неизвестного состояния
 function FallbackScreen() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -34,12 +28,21 @@ export default function MiniApp() {
   const { appState } = useAppContext();
   const { isReady } = useUsersInit({ logResult: true });
   const [uiReady, setUiReady] = useState(false);
-  const firstLoad = FirstLoad();
+
+  // Мемоизированный LoadScreen, чтобы использовать один и тот же элемент
+  const loadScreenMemo = useMemo(() => <LoadScreen />, []);
+
+  // Инициализация SDK + preload MainScreen
   useEffect(() => {
+    // SDK
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
     viewport.mount();
     viewport.expand();
+
+    // Preload MainScreen (lazy)
+    import("./MainScreen").then(() => setUiReady(true));
+
     return () => {
       swipeBehavior.unmount();
       try {
@@ -50,6 +53,7 @@ export default function MiniApp() {
     };
   }, []);
 
+  // Определяем, какой экран рендерить по appState
   const StateComponent = useMemo(() => {
     switch (appState) {
       case "main":
@@ -65,12 +69,14 @@ export default function MiniApp() {
     }
   }, [appState]);
 
-  if (!isReady) {
-    return <LoadScreen />;
+  // Если данные пользователя или UI ещё не готовы — показываем LoadScreen
+  if (!isReady || !uiReady) {
+    return loadScreenMemo;
   }
 
+  // Suspense для ленивых экранов, fallback = LoadScreen (мемоизирован)
   return (
-    <Suspense fallback={firstLoad() === 1 ? <LoadScreen /> : null}>
+    <Suspense fallback={loadScreenMemo}>
       <StateComponent />
     </Suspense>
   );
