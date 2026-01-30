@@ -1,11 +1,11 @@
 import { useAppContext } from "@/providers/AppContex";
+import { useUsersInit } from "@/hooks/useUsersInit";
 import { useEffect, useMemo, Suspense, lazy } from "react";
 import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
 import "./style.css";
 import LoadScreen from "./LoadScreen";
 
-// ✅ lazy создаётся ОДИН раз
 const MainScreen = lazy(() => import("./MainScreen"));
 const QuizSettings = lazy(() => import("./QuizSettings"));
 const QuizScreen = lazy(() => import("./QuizScreen"));
@@ -24,14 +24,13 @@ function FallbackScreen() {
 
 export default function MiniApp() {
   const { appState } = useAppContext();
+  const { isReady } = useUsersInit({ logResult: true });
 
   useEffect(() => {
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
-
     viewport.mount();
     viewport.expand();
-
     return () => {
       swipeBehavior.unmount();
       try {
@@ -42,7 +41,6 @@ export default function MiniApp() {
     };
   }, []);
 
-  // ✅ useMemo ТЕПЕРЬ работает корректно
   const StateComponent = useMemo(() => {
     switch (appState) {
       case "main":
@@ -58,13 +56,12 @@ export default function MiniApp() {
     }
   }, [appState]);
 
+  if (!isReady) {
+    return <LoadScreen />;
+  }
+
   return (
-    <Suspense
-      fallback={
-        // <LoadScreen/>
-        null
-      }
-    >
+    <Suspense fallback={null}>
       <StateComponent />
     </Suspense>
   );

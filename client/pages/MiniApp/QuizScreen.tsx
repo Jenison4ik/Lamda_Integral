@@ -18,6 +18,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FieldLabel } from "@/components/ui/field";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export default function QuizScreen() {
   const { hapticTrigger } = useHaptic();
@@ -31,12 +32,18 @@ export default function QuizScreen() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-4 ">
+      <div className="flex flex-col items-center justify-between gap-4 text-sm w-full max-w-sm">
+        <Badge>Вопрос 1/10</Badge>
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Вопрос 1</CardTitle>
+          <CardTitle>Вычислите неопределенный интеграл</CardTitle>
         </CardHeader>
         <CardContent>
-          <MathBlock formula="\int \frac{dx}{\sqrt{1 - (\ln x)^2}} \cdot \frac{1}{x}" />
+          <MathBlock
+            formula="\int \frac{dx}{\sqrt{1 - (\ln x)^2}} \cdot \frac{1}{x}"
+            className="text-lg"
+          />
         </CardContent>
       </Card>
       <Card className="w-full max-w-sm">

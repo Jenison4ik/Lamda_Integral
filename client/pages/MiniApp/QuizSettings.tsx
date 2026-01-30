@@ -189,7 +189,7 @@ export default function QuizSettings() {
         </CardContent>
       </Card>
       <Button
-        className="w-full max-w-sm mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
+        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
         onClick={() => {
           hapticTrigger("medium");
           startTransition(() => {
