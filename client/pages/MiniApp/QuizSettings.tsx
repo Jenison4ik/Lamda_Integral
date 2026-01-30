@@ -80,7 +80,7 @@ export default function QuizSettings() {
           <p className="text-muted-foreground">Выбери параметры квиза и приступай к решению интегралов</p>
           <FieldGroup>
             <Field>
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3 mb-3 justify-between">
                 <FieldLabel htmlFor="input-field-num-of-questions" className="whitespace-nowrap font-semibold    text-lg">
                   Количество вопросов
                 </FieldLabel>
@@ -108,7 +108,7 @@ export default function QuizSettings() {
                       setInputValue(value.toString());
                     }
                   }}
-                  placeholder="Количество вопросов"
+                  placeholder=""
                   className="w-auto min-w-[80px]"
                   disabled={isPending}
                 />
@@ -151,7 +151,7 @@ export default function QuizSettings() {
         </CardContent>
       </Card>
       <Button
-        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-lg font-semibold cursor-pointer"
+        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-lg font-medium cursor-pointer"
         onClick={() => {
           hapticTrigger("medium");
           startTransition(() => {
@@ -161,7 +161,7 @@ export default function QuizSettings() {
         disabled={isPending}
       >
         {isPending ? <Spinner /> : "Поехали"}
-        {!isPending && <MoveRight scale={15} />}
+        {!isPending && <MoveRight scale={25} />}
       </Button>
     </main>
   );
