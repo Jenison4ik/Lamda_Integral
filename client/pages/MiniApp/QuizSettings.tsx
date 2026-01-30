@@ -21,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 
@@ -31,6 +32,14 @@ export default function QuizSettings() {
   const [numOfQuestions, setNumOfQuestions] = useState(10);
   const [inputValue, setInputValue] = useState("10");
   const [isPending, startTransition] = useTransition();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const photoUrl = launchParams?.tgWebAppData?.user?.photo_url;
+  const firstName = launchParams?.tgWebAppData?.user?.first_name;
+  const hasUserData = !!firstName;
+  const showImageSkeleton = !photoUrl || !imageLoaded || imageError;
+  const showTextSkeleton = !hasUserData;
 
 
   function backToMenuBtn() {
@@ -59,22 +68,44 @@ export default function QuizSettings() {
     return backbtn;
   }, [])
 
+  useEffect(() => {//Загрузка аватарки
+    if (photoUrl) {
+      setImageLoaded(false);
+      setImageError(false);
+    }
+  }, [photoUrl])
+
 
   return (
     <main>
       <Card>
         <CardHeader className="flex items-center gap-2 ">
-          <img
-            src={
-              launchParams?.tgWebAppData?.user?.photo_url ??
-              "./img/user_placeholder.jpeg"
-            }
-            alt="user"
-            className="w-50px] h-[50px] rounded-full"
-          />
-          <CardTitle className="text-xl">
-            Привет 👋, {launchParams?.tgWebAppData?.user?.first_name}!
-          </CardTitle>
+          <div className="w-[50px] h-[50px] rounded-full shrink-0">
+            {showImageSkeleton ? (
+              <Skeleton className="w-full h-full rounded-full" />
+            ) : (
+              <img
+                src={photoUrl}
+                alt="user"
+                className="w-full h-full rounded-full object-cover"
+                onLoad={() => setImageLoaded(true)}
+                onError={() => {
+                  setImageError(true);
+                  setImageLoaded(false);
+                }}
+              />
+            )}
+          </div>
+
+          {showTextSkeleton ? (
+            <div className="grid gap-2 flex-1">
+              <Skeleton className="h-6 w-[200px]" />
+            </div>
+          ) : (
+            <CardTitle className="text-xl">
+              Привет 👋, {firstName}!
+            </CardTitle>
+          )}
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">Выбери параметры квиза и приступай к решению интегралов</p>
@@ -151,7 +182,7 @@ export default function QuizSettings() {
         </CardContent>
       </Card>
       <Button
-        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-lg font-medium cursor-pointer"
+        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
         onClick={() => {
           hapticTrigger("medium");
           startTransition(() => {
