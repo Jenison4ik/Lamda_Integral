@@ -61,7 +61,8 @@ export default function MiniApp() {
   return (
     <Suspense
       fallback={
-        <LoadScreen/>
+        // <LoadScreen/>
+        null
       }
     >
       <StateComponent />

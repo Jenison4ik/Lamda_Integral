@@ -1,6 +1,6 @@
 import { useAppContext } from "@/providers/AppContex";
 import useHaptic from "@/hooks/useHaptic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   backButton,
   retrieveLaunchParams,
@@ -8,11 +8,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import "./style.css";
 import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-  } from "@/components/ui/field"
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -20,6 +20,7 @@ import { Label } from "@radix-ui/react-label";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 
 
@@ -29,46 +30,54 @@ export default function QuizSettings() {
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
   const [numOfQuestions, setNumOfQuestions] = useState(10);
   const [inputValue, setInputValue] = useState("10");
+  const [isPending, startTransition] = useTransition();
 
-  function backToMenuBtn(){
-    if(backButton.isSupported()){
+
+  function backToMenuBtn() {
+    if (backButton.isSupported()) {
       backButton.mount();
       backButton.show();
-      backButton.onClick(()=>{setAppState("main")});
-      return ()=>{
+      backButton.onClick(() => {
+        backButton.onClick(() => {
+          startTransition(() => {
+            setAppState("main");
+          });
+        });
+      });
+      return () => {
         backButton.hide();
         backButton.unmount()
 
       }
     }
-  return ()=>{}
+    return () => { }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     const backbtn = backToMenuBtn();
 
     return backbtn;
-  },[])
+  }, [])
 
 
   return (
-      <main>
-        <Card>
-          <CardHeader className="flex items-center gap-2 ">
-            <img
-              src={
-                launchParams?.tgWebAppData?.user?.photo_url ??
-                "./img/user_placeholder.jpeg"
-              }
-              alt="user"
-              className="w-50px] h-[50px] rounded-full"
-            />
-            <CardTitle className="text-xl">
-              Привет 👋, {launchParams?.tgWebAppData?.user?.first_name}!
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Выбери параметры квиза и приступай к решению интегралов</p>
+    <main>
+      <Card>
+        <CardHeader className="flex items-center gap-2 ">
+          <img
+            src={
+              launchParams?.tgWebAppData?.user?.photo_url ??
+              "./img/user_placeholder.jpeg"
+            }
+            alt="user"
+            className="w-50px] h-[50px] rounded-full"
+          />
+          <CardTitle className="text-xl">
+            Привет 👋, {launchParams?.tgWebAppData?.user?.first_name}!
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Выбери параметры квиза и приступай к решению интегралов</p>
           <FieldGroup>
             <Field>
               <div className="flex items-center gap-3 mb-3">
@@ -101,12 +110,13 @@ export default function QuizSettings() {
                   }}
                   placeholder="Количество вопросов"
                   className="w-auto min-w-[80px]"
+                  disabled={isPending}
                 />
               </div>
-              <Slider 
-                min={5} 
-                max={20} 
-                step={1} 
+              <Slider
+                min={5}
+                max={20}
+                step={1}
                 value={[numOfQuestions]}
                 onValueChange={(values) => {
                   setNumOfQuestions(values[0]);
@@ -114,40 +124,45 @@ export default function QuizSettings() {
                   hapticTrigger("soft");
                 }}
                 className="w-full"
+
+                disabled={isPending}
               />
               <FieldDescription>
                 Минимум 5, максимум 20
               </FieldDescription>
             </Field>
 
-            <Separator/>
+            <Separator />
             <Field>
-                <FieldLabel className="whitespace-nowrap font-semibold text-lg">Вариант ответов</FieldLabel>
-            <RadioGroup defaultValue="end" onValueChange={()=>(hapticTrigger("soft"))}>
-  <div className="flex items-center gap-3">
-    <RadioGroupItem value="every" id="every" />
-    <Label htmlFor="every">Ответы после каждого</Label>
-  </div>
-  <div className="flex items-center gap-3">
-    <RadioGroupItem value="end" id="end" />
-    <Label htmlFor="end">Результат в конце</Label>
-  </div>
-</RadioGroup>
+              <FieldLabel className="whitespace-nowrap font-semibold text-lg">Вариант ответов</FieldLabel>
+              <RadioGroup defaultValue="end" onValueChange={() => (hapticTrigger("soft"))} disabled={isPending}>
+                <div className="flex items-center gap-3">
+                  <RadioGroupItem value="every" id="every" />
+                  <Label htmlFor="every">Ответы после каждого</Label>
+                </div>
+                <div className="flex items-center gap-3">
+                  <RadioGroupItem value="end" id="end" />
+                  <Label htmlFor="end">Результат в конце</Label>
+                </div>
+              </RadioGroup>
             </Field>
           </FieldGroup>
-          
-          </CardContent>
-        </Card>
-        <Button 
-            className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-lg font-semibold cursor-pointer"
-            onClick={() => {
-              hapticTrigger("medium");
-              setAppState("quiz");
-            }}
-          >
-            Поехали
-            <MoveRight scale={15}/>
-          </Button>
-      </main>
+
+        </CardContent>
+      </Card>
+      <Button
+        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-lg font-semibold cursor-pointer"
+        onClick={() => {
+          hapticTrigger("medium");
+          startTransition(() => {
+            setAppState("quiz");
+          })
+        }}
+        disabled={isPending}
+      >
+        {isPending ? <Spinner /> : "Поехали"}
+        {!isPending && <MoveRight scale={15} />}
+      </Button>
+    </main>
   );
 }
