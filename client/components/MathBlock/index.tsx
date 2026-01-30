@@ -20,5 +20,9 @@ export default function MathBlock({
       throwOnError: false,
     });
   }, [formula]);
-  return <div ref={ref} className={cn("katex", className)}></div>;
+  return (
+    <div className={cn("text-base", className)}>
+      <div ref={ref} className="katex w-full h-full" />
+    </div>
+  );
 }

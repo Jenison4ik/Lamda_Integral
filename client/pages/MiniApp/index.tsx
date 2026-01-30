@@ -1,13 +1,12 @@
 import { useAppContext } from "@/providers/AppContex";
 import { useUsersInit } from "@/hooks/useUsersInit";
-import { useEffect, useMemo, useState, Suspense, lazy } from "react";
+import { useEffect, useMemo, Suspense, lazy, useState } from "react";
 import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
 import "./style.css";
 import LoadScreen from "./LoadScreen";
 
-const mainScreenImport = () => import("./MainScreen");
-const MainScreen = lazy(mainScreenImport);
+const MainScreen = lazy(() => import("./MainScreen"));
 const QuizSettings = lazy(() => import("./QuizSettings"));
 const QuizScreen = lazy(() => import("./QuizScreen"));
 const ResultScreen = lazy(() => import("./ResultScreen"));
@@ -26,14 +25,11 @@ function FallbackScreen() {
 export default function MiniApp() {
   const { appState } = useAppContext();
   const { isReady } = useUsersInit({ logResult: true });
-  const [mainChunkLoaded, setMainChunkLoaded] = useState(false);
-
-  // Параллельно с useUsersInit подгружаем чанк MainScreen
-  useEffect(() => {
-    mainScreenImport().then(() => setMainChunkLoaded(true));
-  }, []);
+  const [uiReady, setUiReady] = useState(false);
 
   useEffect(() => {
+    import("./MainScreen").then(() => setUiReady(true));
+
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
     viewport.mount();
@@ -48,26 +44,28 @@ export default function MiniApp() {
     };
   }, []);
 
-  const stateContent = useMemo(() => {
+  const StateComponent = useMemo(() => {
     switch (appState) {
       case "main":
-        return <MainScreen />;
+        return MainScreen;
       case "difficulty-pick":
-        return <QuizSettings />;
+        return QuizSettings;
       case "quiz":
-        return <QuizScreen />;
+        return QuizScreen;
       case "result":
-        return <ResultScreen />;
+        return ResultScreen;
       default:
-        return <FallbackScreen />;
+        return FallbackScreen;
     }
   }, [appState]);
 
-  const bothReady = appState === "main" ? isReady && mainChunkLoaded : isReady;
-
-  if (!bothReady) {
+  if (!isReady || !uiReady) {
     return <LoadScreen />;
   }
 
-  return <Suspense fallback={null}>{stateContent}</Suspense>;
+  return (
+    <Suspense fallback={null}>
+      <StateComponent />
+    </Suspense>
+  );
 }
