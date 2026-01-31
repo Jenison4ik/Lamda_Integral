@@ -1,17 +1,21 @@
 /**
  * Сервис для работы с пользователями
- * 
+ *
  * Ответственность:
  * - Работа с Prisma
  * - Бизнес-правила
  * - Транзакции
- * 
+ *
  * ❌ НЕ знает, что такое HTTP (Request, Response)
  */
 
-import { prisma } from '../prisma.js';
-import { CreateUserInput, UserDto } from '../types/user.types.js';
-import { UniqueConstraintError, isPrismaUniqueConstraintError } from '../errors/app.errors.js';
+import { prisma } from "../prisma.js";
+import { CreateUserInput, UserDto } from "../types/user.types.js";
+import {
+  UniqueConstraintError,
+  ValidationError,
+  isPrismaUniqueConstraintError,
+} from "../errors/app.errors.js";
 
 /**
  * Преобразует User из Prisma в DTO для API
@@ -37,32 +41,38 @@ function toUserDto(user: {
  * @throws {UniqueConstraintError} если пользователь с таким telegramId уже существует
  */
 async function create(input: CreateUserInput): Promise<UserDto> {
-  const telegramId = input.telegramId != null
-    ? BigInt(input.telegramId)
-    : BigInt(Date.now());
+  if (input.telegramId == null || input.telegramId === "") {
+    throw new ValidationError("telegramId обязателен");
+  }
 
-  const username = typeof input.username === 'string' 
-    ? input.username 
-    : null;
+  const telegramId = BigInt(input.telegramId);
+
+  const username =
+    typeof input.username === "string" && input.username.trim() !== ""
+      ? input.username.trim()
+      : null;
 
   try {
     const user = await prisma.user.upsert({
       where: { telegramId: telegramId },
       update: {
-        lastSeen: new Date()
+        lastSeen: new Date(),
       },
       create: {
         telegramId: telegramId,
         username: username,
         lastSeen: new Date(),
         createdAt: new Date(),
-      }
+      },
     });
 
     return toUserDto(user);
   } catch (error) {
     if (isPrismaUniqueConstraintError(error)) {
-      throw new UniqueConstraintError('telegramId', 'Пользователь с таким telegramId уже есть');
+      throw new UniqueConstraintError(
+        "telegramId",
+        "Пользователь с таким telegramId уже есть",
+      );
     }
     throw error;
   }
@@ -99,4 +109,3 @@ export const userService = {
   getById,
   getByTelegramId,
 };
-

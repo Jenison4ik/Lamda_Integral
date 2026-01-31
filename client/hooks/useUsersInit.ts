@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  ensureUser,
-  type EnsureUserPayload,
-  type EnsureUserResult,
-} from "@/service/users";
+import { ensureUser, type EnsureUserResult } from "@/service/users";
 
 export interface UseUsersInitOptions {
-  /** Дополнительные данные для POST /api/users */
-  payload?: EnsureUserPayload;
   /** Логировать результат в консоль (по умолчанию true) */
   logResult?: boolean;
 }
@@ -37,11 +31,11 @@ export function useUsersInit(
 
   useEffect(() => {
     let cancelled = false;
-    const { payload: p, logResult: log } = optionsRef.current;
+    const { logResult: log } = optionsRef.current;
 
     (async () => {
       try {
-        const data = await ensureUser(p ?? {});
+        const data = await ensureUser();
         if (cancelled) return;
         setResult(data);
         if (log !== false) {

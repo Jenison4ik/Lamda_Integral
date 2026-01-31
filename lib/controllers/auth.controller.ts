@@ -16,6 +16,9 @@ import {
   AdminLoginError,
   AdminVerifyResult,
   AdminVerifyError,
+  TelegramAuthInput,
+  TelegramAuthResult,
+  TelegramAuthError,
 } from "../types/auth.types.js";
 import { ControllerResult } from "../types/common.types.js";
 import {
@@ -23,6 +26,7 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "../errors/app.errors.js";
+import { authService } from "../services/auth.service.js";
 
 const getAdminPassword = () => process.env.ADMIN_PASSWORD ?? "";
 const getAdminSecret = () => process.env.ADMIN_JWT_SECRET ?? "";
@@ -102,6 +106,38 @@ export async function verifyAdmin(
     return {
       status: 401,
       data: { ok: false, error: "Недействительный токен" },
+    };
+  }
+}
+
+export async function ensureTelegramUser(
+  input: TelegramAuthInput,
+): Promise<ControllerResult<TelegramAuthResult | TelegramAuthError>> {
+  try {
+    const initData = typeof input.initData === "string" ? input.initData : "";
+    if (!initData) {
+      throw new ValidationError("initData обязателен.");
+    }
+
+    const user = await authService.ensureTelegramUser(initData);
+
+    return {
+      status: 200,
+      data: { ok: true, user },
+    };
+  } catch (error) {
+    console.error("ensureTelegramUser error:", error);
+
+    if (error instanceof AppError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+
+    return {
+      status: 500,
+      data: { ok: false, error: "Не удалось выполнить авторизацию" },
     };
   }
 }

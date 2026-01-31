@@ -1,38 +1,37 @@
 /**
  * HTTP-адаптер: Users API
  * POST /api/users - Создание пользователя
- * 
+ *
  * Ответственность:
  * - Разбор HTTP-запроса
  * - Проверка метода
  * - Вызов контроллера
  * - Формирование HTTP-ответа
- * 
+ *
  * ❌ БЕЗ бизнес-логики
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createUser } from '../lib/controllers/user.controller.js';
-import type { CreateUserInput } from '../lib/types/user.types.js';
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { ensureTelegramUser } from "../lib/controllers/auth.controller.js";
+import type { TelegramAuthInput } from "../lib/types/auth.types.js";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Проверка метода
-  if (req.method !== 'POST') {
+  if (req.method !== "POST") {
     return res.status(405).json({
       ok: false,
-      error: 'Метод не разрешён. Используйте POST.',
+      error: "Метод не разрешён. Используйте POST.",
     });
   }
 
   // Извлечение входных данных
-  const input: CreateUserInput = req.body || {};
+  const input: TelegramAuthInput = req.body || {};
 
   // Вызов контроллера (platform-agnostic)
-  const result = await createUser(input);
+  const result = await ensureTelegramUser(input);
 
   // Формирование HTTP-ответа
   return res.status(result.status).json(result.data);
 }
-

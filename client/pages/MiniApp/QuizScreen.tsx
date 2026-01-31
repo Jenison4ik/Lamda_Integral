@@ -34,6 +34,7 @@ export default function QuizScreen() {
     <main className="flex flex-col items-center justify-center min-h-screen gap-4 ">
       <div className="flex flex-col items-center justify-between gap-4 text-sm w-full max-w-sm">
         <Badge>Вопрос 1/10</Badge>
+        <Badge variant={"secondary"}>{"Не решен"}</Badge>
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader>

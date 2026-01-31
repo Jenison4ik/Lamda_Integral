@@ -28,7 +28,7 @@ Page → useHook() → service.api() → fetch /api/...
 
 ## Пример (инициализация пользователя)
 
-1. **service/users.ts** — `ensureUser(payload)` → `POST /api/users`, возвращает результат.
+1. **service/users.ts** — `ensureUser()` → `POST /api/users` с `initData`, возвращает результат.
 2. **hooks/useUsersInit.ts** — при монтировании вызывает `ensureUser`, хранит `isReady`, `error`, `result`; можно переиспользовать в любом экране.
 3. **pages/MiniApp/index.tsx** — вызывает `useUsersInit()`, при `!isReady` рендерит `<LoadScreen />`, иначе контент.
 

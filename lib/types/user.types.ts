@@ -7,7 +7,7 @@
  */
 export interface CreateUserInput {
   telegramId: number | string;
-  username: string;
+  username?: string | null;
 }
 
 /**
@@ -37,4 +37,3 @@ export interface CreateUserError {
   ok: false;
   error: string;
 }
-

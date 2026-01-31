@@ -3,12 +3,9 @@
  * Единственная точка вызова /api/users — переиспользуется в хуках и компонентах.
  */
 
-const USERS_API = "/api/users";
+import { retrieveRawInitData } from "@tma.js/sdk";
 
-export interface EnsureUserPayload {
-  telegramId?: number | string;
-  username?: string;
-}
+const USERS_API = "/api/users";
 
 export type EnsureUserResult = { ok: true; user: unknown } | { ok: false; error: string };
 
@@ -16,11 +13,16 @@ export type EnsureUserResult = { ok: true; user: unknown } | { ok: false; error:
  * Создаёт/обновляет пользователя на бэкенде (POST /api/users).
  * Бросает при сетевой ошибке или невалидном ответе.
  */
-export async function ensureUser(payload: EnsureUserPayload = {}): Promise<EnsureUserResult> {
+export async function ensureUser(): Promise<EnsureUserResult> {
+  const initData = retrieveRawInitData();
+  if (!initData) {
+    throw new Error("initData недоступен. Откройте Mini App в Telegram.");
+  }
+
   const response = await fetch(USERS_API, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ initData }),
   });
 
   const data = await response.json();

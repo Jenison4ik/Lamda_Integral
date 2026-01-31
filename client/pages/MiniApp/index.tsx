@@ -1,7 +1,7 @@
 import { useAppContext } from "@/providers/AppContex";
 import { useUsersInit } from "@/hooks/useUsersInit";
 import { useEffect, useMemo, Suspense, lazy, useState } from "react";
-import { swipeBehavior, useLaunchParams, viewport } from "@tma.js/sdk-react";
+import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
 import "./style.css";
 import LoadScreen from "./LoadScreen";
@@ -27,8 +27,7 @@ function FallbackScreen() {
 export default function MiniApp() {
   const { appState } = useAppContext();
   const [uiReady, setUiReady] = useState(false);
-  const data = useLaunchParams();
-  const { isReady } = useUsersInit({ payload: { telegramId: data.tgWebAppData?.user?.id, username: data.tgWebAppData?.user?.username }, logResult: true });
+  const { isReady } = useUsersInit({ logResult: true });
   // Мемоизированный LoadScreen, чтобы использовать один и тот же элемент
   const loadScreenMemo = useMemo(() => <LoadScreen />, []);
 
