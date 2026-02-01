@@ -2,6 +2,7 @@ import katex from "katex";
 import { useEffect, useRef } from "react";
 import "katex/dist/katex.min.css";
 import { cn } from "@/lib/utils";
+import "./style.css"
 
 export default function MathBlock({
   formula,
@@ -21,7 +22,7 @@ export default function MathBlock({
     });
   }, [formula]);
   return (
-    <div className={cn("text-base", className)}>
+    <div className={cn("text-base math-block", className)}>
       <div ref={ref} className="katex w-full h-full" />
     </div>
   );
