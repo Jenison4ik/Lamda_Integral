@@ -1,3 +1,4 @@
-.math-block .katex{
-    font-size: inherit;
+/* KaTeX по умолчанию 1.21em — переопределяем для наследования размера */
+.math-block .katex {
+  font-size: 1em !important;
 }
