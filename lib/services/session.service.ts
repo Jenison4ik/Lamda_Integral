@@ -28,6 +28,7 @@ export async function create(input: CreateSessionInput) {
     data: {
       userId: input.userId,
       difficulty: input.difficulty,
+      showAnswersAfterEach: input.showAnswersAfterEach,
       questions: {
         create: questionIds.map((questionId, orderIndex) => ({
           questionId,

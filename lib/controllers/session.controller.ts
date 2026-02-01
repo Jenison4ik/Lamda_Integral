@@ -21,12 +21,14 @@ import { ControllerResult } from "../types/common.types.js";
 import { AppError } from "../errors/app.errors.js";
 
 /**
- * Преобразует сессию из Prisma в DTO для API (questionIds из связи questions)
+ * Преобразует сессию из Prisma в DTO для API.
+ * totalQuestions — единственный источник правды: длина questionIds (session_questions).
  */
 function toSessionDto(session: {
   id: number;
   userId: number;
   difficulty: string;
+  showAnswersAfterEach?: boolean;
   startedAt: Date;
   finishedAt?: Date | null;
   questions?: { questionId: number; orderIndex: number }[];
@@ -39,6 +41,7 @@ function toSessionDto(session: {
     userId: session.userId,
     difficulty: session.difficulty,
     totalQuestions: questionIds.length,
+    showAnswersAfterEach: session.showAnswersAfterEach ?? false,
     questionIds,
     startedAt: session.startedAt.toISOString(),
     finishedAt: session.finishedAt ? session.finishedAt.toISOString() : null,

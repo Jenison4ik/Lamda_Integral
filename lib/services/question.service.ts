@@ -67,7 +67,9 @@ async function getQuestions(
 ): Promise<QuestionDto[]> {
   const questions = await prisma.question.findMany({
     where: params.difficulty ? { difficulty: params.difficulty } : undefined,
-    orderBy: { id: "desc" },
+    // orderBy id asc: с Turso/libSQL orderBy "desc" даёт "no such column: desc" (слово в кавычках в SQL).
+    // Нужны новые первыми — на клиенте сделать .reverse() или сортировку по id.
+    orderBy: { id: "asc" },
     skip: params.offset,
     take: params.limit,
     include: {

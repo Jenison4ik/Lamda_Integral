@@ -50,6 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const body = (req.body || {}) as TelegramAuthInput & {
     difficulty?: string;
     totalQuestions?: number;
+    showAnswersAfterEach?: boolean;
   };
 
   const initData =
@@ -77,11 +78,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     typeof body.difficulty === "string" && body.difficulty.trim()
       ? body.difficulty.trim()
       : "medium";
+  const showAnswersAfterEach =
+    typeof body.showAnswersAfterEach === "boolean"
+      ? body.showAnswersAfterEach
+      : false;
 
   const input: CreateSessionInput = {
     userId: authResult.data.user.id,
     difficulty,
     totalQuestions,
+    showAnswersAfterEach,
   };
 
   const result = await createSession(input);

@@ -23,6 +23,7 @@ export async function createSession(input: CreateSessionInput) {
       initData,
       totalQuestions: input.totalQuestions,
       difficulty: input.difficulty ?? "medium",
+      showAnswersAfterEach: input.showAnswersAfterEach,
     }),
   });
 

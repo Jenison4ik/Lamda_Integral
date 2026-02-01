@@ -130,6 +130,26 @@ turso db shell DB_NAME < "$LATEST"
 
 ---
 
+## 3.1. Ошибка «no such column: desc» при открытии консоли
+
+При запуске `turso db shell <DB_NAME>` без аргументов открывается интерактивная консоль; при её инициализации иногда выполняется служебный запрос с `ORDER BY ... desc`, и libSQL может выдать **no such column: desc** (слово воспринимается как колонка).
+
+**Обход:** не открывать интерактивный shell — выполнять SQL напрямую:
+
+```bash
+# Одна команда
+turso db shell lambda-db "SELECT name FROM sqlite_master WHERE type='table';"
+
+# Несколько команд — через pipe
+echo "SELECT name FROM sqlite_master WHERE type='table';" | turso db shell lambda-db
+```
+
+Миграции как обычно: `turso db shell lambda-db < prisma/migrations/.../migration.sql`.
+
+Обновление CLI иногда снимает проблему: `turso upgrade` (или переустановка по [документации](https://docs.turso.tech/cli/installation)).
+
+---
+
 ## 4. Важно
 
 1. **Не применяй `prisma migrate dev` к Turso-URL**  

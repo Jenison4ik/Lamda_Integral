@@ -27,11 +27,12 @@ model User {
 }
 
 model QuizSession {
-  id              Int              @id @default(autoincrement())
-  userId          Int
-  difficulty      String
-  startedAt       DateTime         @default(now())
-  finishedAt      DateTime?
+  id                   Int              @id @default(autoincrement())
+  userId               Int
+  difficulty           String
+  showAnswersAfterEach Boolean          @default(false) // true: после каждого, false: в конце
+  startedAt            DateTime         @default(now())
+  finishedAt           DateTime?
 
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   questions       SessionQuestion[]  // связи с вопросами (порядок: вопрос, затем ответы после каждого / в конце)
