@@ -119,14 +119,14 @@ turso db shell DB_NAME < "$LATEST"
 
 ## 3. Полезные команды
 
-| Действие | Команда |
-|----------|---------|
-| Миграции (локально) | `npx prisma migrate dev --name <name>` |
+| Действие                              | Команда                                              |
+| ------------------------------------- | ---------------------------------------------------- |
+| Миграции (локально)                   | `npx prisma migrate dev --name <name>`               |
 | Только создать миграцию, не применять | `npx prisma migrate dev --name <name> --create-only` |
-| Сгенерировать клиент | `npx prisma generate` |
-| Список баз Turso | `turso db list` |
-| Применить SQL в Turso | `turso db shell <DB_NAME> < path/to/migration.sql` |
-| Интерактивная консоль Turso | `turso db shell <DB_NAME>` |
+| Сгенерировать клиент                  | `npx prisma generate`                                |
+| Список баз Turso                      | `turso db list`                                      |
+| Применить SQL в Turso                 | `turso db shell <DB_NAME> < path/to/migration.sql`   |
+| Интерактивная консоль Turso           | `turso db shell <DB_NAME>`                           |
 
 ---
 

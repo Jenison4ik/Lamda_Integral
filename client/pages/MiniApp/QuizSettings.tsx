@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCreateSession } from "@/hooks/api/useSession";
 
 export default function QuizSettings() {
   const { setAppState } = useAppContext();
@@ -26,9 +27,16 @@ export default function QuizSettings() {
   const launchParams = useMemo(() => retrieveLaunchParams(), []);
   const [numOfQuestions, setNumOfQuestions] = useState(10);
   const [inputValue, setInputValue] = useState("10");
-  const [isPending, startTransition] = useTransition();
+  const [answerMode, setAnswerMode] = useState<"every" | "end">("end");
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isTransitioning, startTransition] = useTransition();
+
+  // React Query mutation для создания сессии
+  const createSession = useCreateSession();
+
+  // Загрузка = ждём сервер ИЛИ UI переходит на новый экран
+  const isPending = createSession.isPending || isTransitioning;
 
   const photoUrl = launchParams?.tgWebAppData?.user?.photo_url;
   const firstName = launchParams?.tgWebAppData?.user?.first_name;
@@ -36,30 +44,46 @@ export default function QuizSettings() {
 
   const showTextSkeleton = !hasUserData;
 
-  function backToMenuBtn() {
-    if (backButton.isSupported()) {
-      backButton.mount();
-      backButton.show();
-      backButton.onClick(() => {
-        backButton.onClick(() => {
-          startTransition(() => {
-            setAppState("main");
-          });
-        });
-      });
-      return () => {
-        backButton.hide();
-        backButton.unmount();
-      };
-    }
-    return () => {};
-  }
-
+  // Кнопка "Назад" в Telegram
   useEffect(() => {
-    const backbtn = backToMenuBtn();
+    if (!backButton.isSupported()) return;
 
-    return backbtn;
-  }, []);
+    backButton.mount();
+    backButton.show();
+
+    const handleBack = () => setAppState("main");
+    backButton.onClick(handleBack);
+
+    return () => {
+      backButton.hide();
+      backButton.unmount();
+    };
+  }, [setAppState]);
+
+  // Обработчик кнопки "Поехали"
+  const handleStartQuiz = () => {
+    hapticTrigger("medium");
+
+    createSession.mutate(
+      {
+        totalQuestions: numOfQuestions,
+        showAnswersAfterEach: answerMode === "every",
+      },
+      {
+        onSuccess: () => {
+          // Переходим на квиз только после успешного создания сессии
+          // startTransition для плавного перехода UI
+          startTransition(() => {
+            setAppState("quiz");
+          });
+        },
+        onError: (error) => {
+          // TODO: показать toast с ошибкой
+          console.error("Ошибка создания сессии:", error);
+        },
+      },
+    );
+  };
 
   useEffect(() => {
     //Загрузка аватарки
@@ -171,8 +195,11 @@ export default function QuizSettings() {
                 Вариант ответов
               </FieldLabel>
               <RadioGroup
-                defaultValue="end"
-                onValueChange={() => hapticTrigger("soft")}
+                value={answerMode}
+                onValueChange={(value: "every" | "end") => {
+                  setAnswerMode(value);
+                  hapticTrigger("soft");
+                }}
                 disabled={isPending}
               >
                 <div className="flex items-center gap-3">
@@ -190,12 +217,7 @@ export default function QuizSettings() {
       </Card>
       <Button
         className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
-        onClick={() => {
-          hapticTrigger("medium");
-          startTransition(() => {
-            setAppState("quiz");
-          });
-        }}
+        onClick={handleStartQuiz}
         disabled={isPending}
       >
         {isPending ? <Spinner /> : "Поехали"}

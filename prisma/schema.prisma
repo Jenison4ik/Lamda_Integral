@@ -30,19 +30,17 @@ model QuizSession {
   id              Int              @id @default(autoincrement())
   userId          Int
   difficulty      String
-  totalQuestions  Int
-  correctAnswers  Int              @default(0)
-  score           Int              @default(0)
-
   startedAt       DateTime         @default(now())
   finishedAt      DateTime?
 
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions       SessionQuestion[]  // связи с вопросами (порядок: вопрос, затем ответы после каждого / в конце)
   answers         SessionAnswer[]
 
   @@map("quiz_sessions")
 }
 
+// Вопрос — самостоятельная единица. Ответы (AnswerOption) идут к вопросу; в квизе: вопрос, затем ответы после каждого (или в конце).
 model Question {
   id            Int              @id @default(autoincrement())
   difficulty    String           // "easy", "medium", "hard"
@@ -50,8 +48,22 @@ model Question {
   createdAt     DateTime         @default(now())
 
   answerOptions AnswerOption[]
+  sessionLinks  SessionQuestion[]  // техническая обратная связь для Prisma
 
   @@map("questions")
+}
+
+// Связь сессии с вопросами: сессия ссылается на вопросы с сохранением порядка (как answerOptions у Question).
+model SessionQuestion {
+  sessionId  Int
+  questionId Int
+  orderIndex Int   // порядок в сессии (0, 1, 2, ...)
+
+  session    QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, questionId])
+  @@map("session_questions")
 }
 
 model AnswerOption {
@@ -67,11 +79,9 @@ model AnswerOption {
 }
 
 model SessionAnswer {
-  id              Int          @id @default(autoincrement())
   sessionId       Int
   questionId      Int          // Для уникальности и быстрых запросов
   chosenOptionId  Int          // ID выбранного варианта ответа
-  isCorrect       Boolean
   answeredAt      DateTime     @default(now())
 
   session         QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
@@ -81,6 +91,6 @@ model SessionAnswer {
   // 2. Быстрых запросов без JOIN
   // 3. Валидации (проверка, что chosenOption принадлежит questionId)
 
-  @@unique([sessionId, questionId])
+  @@id([sessionId, questionId])
   @@map("session_answers")
 }
