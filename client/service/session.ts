@@ -6,9 +6,24 @@ export interface CreateSessionInput {
   difficulty?: string;
 }
 
+/** Тип ответа от API при создании сессии */
+interface CreateSessionResponse {
+  ok: true;
+  session: {
+    id: number;
+    difficulty: string;
+    totalQuestions: number;
+    showAnswersAfterEach: boolean;
+    questionIds: number[];
+    startedAt: string;
+    finishedAt: string | null;
+  };
+}
+
 /**
  * Создаёт новую сессию квиза (POST /api/session).
  * Пользователь определяется по initData Telegram WebApp.
+ * Возвращает SessionDto с currentIndex = 0 (новая сессия).
  */
 export async function createSession(input: CreateSessionInput) {
   const initData = retrieveRawInitData();
@@ -32,7 +47,18 @@ export async function createSession(input: CreateSessionInput) {
     throw new Error(error?.error ?? "Не удалось создать сессию");
   }
 
-  return response.json();
+  const data: CreateSessionResponse = await response.json();
+
+  // Преобразуем в SessionDto для фронта (добавляем currentIndex)
+  return {
+    id: data.session.id,
+    difficulty: data.session.difficulty,
+    totalQuestions: data.session.totalQuestions,
+    showAnswersAfterEach: data.session.showAnswersAfterEach,
+    currentIndex: 0, // новая сессия — начинаем с 0
+    startedAt: data.session.startedAt,
+    finishedAt: data.session.finishedAt,
+  };
 }
 
 /**

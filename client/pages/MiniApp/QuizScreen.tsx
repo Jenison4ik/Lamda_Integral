@@ -219,7 +219,7 @@ export default function QuizScreen() {
             <MathBlock
               formula={question.text}
               className="text-lg"
-              fontSize={30}
+              fontSize={24}
             />
           </CardContent>
         </Card>

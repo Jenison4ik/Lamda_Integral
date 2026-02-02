@@ -16,6 +16,8 @@ import {
   CreateSessionError,
   GetLastActiveSessionResult,
   SessionDto,
+  SessionQuestionResult,
+  SubmitAnswerResult,
 } from "../types/session.types.js";
 import { ControllerResult } from "../types/common.types.js";
 import { AppError } from "../errors/app.errors.js";
@@ -122,6 +124,102 @@ export async function getLastActiveSession(
         ok: false,
         error: "Не удалось получить последнюю активную сессию",
       },
+    };
+  }
+}
+
+/**
+ * Получение вопроса по индексу в сессии.
+ * Ответы возвращаются БЕЗ isCorrect — защита от жульничества.
+ */
+export async function getQuestion(
+  sessionId: number,
+  index: number,
+): Promise<ControllerResult<SessionQuestionResult | CreateSessionError>> {
+  try {
+    const result = await sessionService.getQuestionByIndex(sessionId, index);
+
+    if (!result) {
+      return {
+        status: 404,
+        data: { ok: false, error: "Вопрос не найден" },
+      };
+    }
+
+    // Преобразуем в DTO без isCorrect
+    const questionDto = {
+      id: result.question.id,
+      text: result.question.text,
+      answers: result.question.answerOptions.map((a) => ({
+        id: a.id,
+        text: a.text,
+        // isCorrect намеренно НЕ передаём
+      })),
+    };
+
+    return {
+      status: 200,
+      data: {
+        ok: true,
+        question: questionDto,
+        index: result.index,
+        isLast: result.isLast,
+      },
+    };
+  } catch (error) {
+    console.error("getQuestion error:", error);
+
+    if (error instanceof AppError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+
+    return {
+      status: 500,
+      data: { ok: false, error: "Не удалось получить вопрос" },
+    };
+  }
+}
+
+/**
+ * Отправка ответа на вопрос.
+ * Сохраняет ответ и возвращает правильность.
+ */
+export async function submitAnswer(
+  sessionId: number,
+  questionId: number,
+  answerId: number,
+): Promise<ControllerResult<SubmitAnswerResult | CreateSessionError>> {
+  try {
+    const result = await sessionService.submitAnswer(
+      sessionId,
+      questionId,
+      answerId,
+    );
+
+    return {
+      status: 200,
+      data: {
+        ok: true,
+        isCorrect: result.isCorrect,
+        correctAnswerId: result.correctAnswerId,
+      },
+    };
+  } catch (error) {
+    console.error("submitAnswer error:", error);
+
+    if (error instanceof AppError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+
+    return {
+      status: 500,
+      data: { ok: false, error: "Не удалось сохранить ответ" },
     };
   }
 }
