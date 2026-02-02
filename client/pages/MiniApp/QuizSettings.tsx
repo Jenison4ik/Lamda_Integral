@@ -226,7 +226,7 @@ export default function QuizSettings() {
             </Field>
             <Separator />
             <Field>
-              <div className="flex items-center justify-betwen">
+              <div className="flex items-center justify-between">
                 <FieldLabel
                   htmlFor="input-field-num-of-questions"
                   className="whitespace-nowrap font-semibold    text-lg"
