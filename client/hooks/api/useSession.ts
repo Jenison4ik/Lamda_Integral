@@ -155,23 +155,17 @@ export function usePrefetchQuestion() {
  *
  * Сразу сохраняет ответ на сервере (восстановление прогресса).
  * Возвращает isCorrect и correctAnswerId для показа результата.
+ *
+ * Примечание: currentIndex управляется локально в QuizScreen,
+ * чтобы избежать конфликта с useEffect синхронизации.
  */
 export function useSubmitAnswer() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: {
       sessionId: number;
       questionId: number;
       answerId: number;
     }) => submitAnswer(input),
-    onSuccess: () => {
-      // Обновляем currentIndex в кэше сессии
-      queryClient.setQueryData<SessionDto | null>(queryKeys.session, (old) => {
-        if (!old) return old;
-        return { ...old, currentIndex: old.currentIndex + 1 };
-      });
-    },
   });
 }
 

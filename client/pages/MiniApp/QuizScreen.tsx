@@ -96,7 +96,7 @@ export default function QuizScreen() {
 
   // Обработчик выбора ответа
   const handleAnswerChange = (value: string) => {
-    if (answerResult) return; // уже ответили
+    if (answerResult || isSubmitting) return; // уже ответили или идёт отправка
     hapticTrigger("soft");
     setSelectedAnswerId(Number(value));
   };
@@ -235,6 +235,7 @@ export default function QuizScreen() {
               className="max-w-sm"
               value={selectedAnswerId?.toString() ?? ""}
               onValueChange={handleAnswerChange}
+              disabled={isSubmitting || !!answerResult}
             >
               {question.answers.map((answer) => (
                 <FieldLabel key={answer.id} htmlFor={`answer-${answer.id}`}>
