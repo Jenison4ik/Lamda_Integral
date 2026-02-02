@@ -51,3 +51,63 @@ export async function getLastActiveSession(userId: number) {
 
   return data;
 }
+
+/**
+ * Получает вопрос по индексу в сессии (GET /api/session/:id/question/:index).
+ * Ответы приходят БЕЗ isCorrect — защита от жульничества.
+ */
+export async function getSessionQuestion(sessionId: number, index: number) {
+  const response = await fetch(`/api/session/${sessionId}/question/${index}`);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.error ?? `HTTP ${response.status}`);
+  }
+
+  return data;
+}
+
+export interface SubmitAnswerInput {
+  sessionId: number;
+  questionId: number;
+  answerId: number;
+}
+
+/**
+ * Отправляет ответ на вопрос (POST /api/session/:id/answer).
+ * Возвращает isCorrect и correctAnswerId для показа результата.
+ */
+export async function submitAnswer(input: SubmitAnswerInput) {
+  const response = await fetch(`/api/session/${input.sessionId}/answer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      questionId: input.questionId,
+      answerId: input.answerId,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.error ?? `HTTP ${response.status}`);
+  }
+
+  return data;
+}
+
+/**
+ * Получает результаты завершённой сессии (GET /api/session/:id/results).
+ */
+export async function getSessionResults(sessionId: number) {
+  const response = await fetch(`/api/session/${sessionId}/results`);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.error ?? `HTTP ${response.status}`);
+  }
+
+  return data;
+}

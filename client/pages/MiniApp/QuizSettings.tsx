@@ -10,6 +10,15 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -31,7 +40,9 @@ export default function QuizSettings() {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isTransitioning, startTransition] = useTransition();
-
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
+    "easy",
+  );
   // React Query mutation для создания сессии
   const createSession = useCreateSession();
 
@@ -68,6 +79,7 @@ export default function QuizSettings() {
       {
         totalQuestions: numOfQuestions,
         showAnswersAfterEach: answerMode === "every",
+        difficulty: difficulty,
       },
       {
         onSuccess: () => {
@@ -211,6 +223,34 @@ export default function QuizSettings() {
                   <Label htmlFor="end">Результат в конце</Label>
                 </div>
               </RadioGroup>
+            </Field>
+            <Separator />
+            <Field>
+              <div className="flex items-center justify-betwen">
+                <FieldLabel
+                  htmlFor="input-field-num-of-questions"
+                  className="whitespace-nowrap font-semibold    text-lg"
+                >
+                  Уровень сложности
+                </FieldLabel>
+                <Select
+                  defaultValue="easy"
+                  disabled={isPending}
+                  onValueChange={(value) => {
+                    setDifficulty(value as "easy" | "medium" | "hard");
+                    hapticTrigger("soft");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="сложность" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="easy">Легкий</SelectItem>
+                    <SelectItem value="medium">Средний</SelectItem>
+                    <SelectItem value="hard">Сложный</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </Field>
           </FieldGroup>
         </CardContent>

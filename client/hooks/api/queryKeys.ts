@@ -9,6 +9,11 @@ export const queryKeys = {
   // Сессия квиза
   session: ["session"] as const,
 
-  // Вопросы для квиза
-  questions: (count: number) => ["questions", count] as const,
+  // Вопрос по индексу в сессии
+  sessionQuestion: (sessionId: number, index: number) =>
+    ["session", sessionId, "question", index] as const,
+
+  // Результаты сессии
+  sessionResults: (sessionId: number) =>
+    ["session", sessionId, "results"] as const,
 } as const;
