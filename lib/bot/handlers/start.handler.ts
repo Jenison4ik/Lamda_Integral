@@ -34,6 +34,9 @@ export function createStartHandler(webAppUrl: string): Composer<Context> {
       await ctx.reply(BOT_MESSAGES.eula, {
         reply_markup: createConfirmEulaKeyboard(),
         parse_mode: "HTML",
+        link_preview_options: {
+          is_disabled: true,
+        },
       });
       return;
     }
