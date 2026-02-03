@@ -234,6 +234,7 @@ export default function QuizSettings() {
                   Уровень сложности
                 </FieldLabel>
                 <Select
+
                   defaultValue="easy"
                   disabled={isPending}
                   onValueChange={(value) => {
@@ -241,7 +242,7 @@ export default function QuizSettings() {
                     hapticTrigger("soft");
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="min-w-[100px]">
                     <SelectValue placeholder="сложность" />
                   </SelectTrigger>
                   <SelectContent>
