@@ -33,7 +33,7 @@ export function createStartHandler(webAppUrl: string): Composer<Context> {
       // Если пользователя нет, показываем EULA с кнопкой подтверждения
       await ctx.reply(BOT_MESSAGES.eula, {
         reply_markup: createConfirmEulaKeyboard(),
-        parse_mode: "MarkdownV2",
+        parse_mode: "HTML",
       });
       return;
     }
