@@ -63,9 +63,9 @@ function MiniAppMain() {
     }
   }, [appState]);
 
-  if (!isReady || !uiReady) {
-    return loadScreenMemo;
-  }
+  // if (!isReady || !uiReady) {
+  //   return loadScreenMemo;
+  // }
 
   return (
     <Suspense fallback={loadScreenMemo}>
