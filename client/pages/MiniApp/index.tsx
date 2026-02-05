@@ -36,11 +36,6 @@ function MiniAppMain() {
   const loadScreenMemo = useMemo(() => <LoadScreen />, []);
 
   useEffect(() => {
-    swipeBehavior.mount();
-    swipeBehavior.disableVertical();
-    viewport.mount();
-    viewport.expand();
-
     import("./MainScreen").then(() => setUiReady(true));
 
     return () => {
@@ -80,6 +75,13 @@ function MiniAppMain() {
 }
 
 export default function MiniApp() {
+  //Настройки отображения приложения
+  useEffect(() => {
+    swipeBehavior.mount();
+    swipeBehavior.disableVertical();
+    viewport.mount();
+    viewport.expand();
+  }, []);
   const { isReady: isUserReady, isInDb, refetch } = useCheckUser();
 
   // Пока не узнали, есть ли пользователь в БД — загрузка
