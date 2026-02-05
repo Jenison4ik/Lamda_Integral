@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { ensureUser } from "@/service/users";
 import { cn } from "@/lib/utils";
@@ -12,26 +12,30 @@ export interface UserAgreementProps {
 
 export default function UserAgreement({ onAccepted }: UserAgreementProps) {
   const [agreed, setAgreed] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  /** После успеха держим UI заблокированным до размонтирования (навигация родителя) */
+  const [navigating, setNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async () => {
-    if (!agreed || loading) return;
+  const handleSubmit = () => {
+    if (!agreed || isPending || navigating) return;
     setError(null);
-    setLoading(true);
-    try {
-      const result = await ensureUser();
-      if (result.ok) {
-        onAccepted();
-      } else {
+    startTransition(async () => {
+      try {
+        const result = await ensureUser();
+        if (result.ok) {
+          setNavigating(true);
+          onAccepted();
+          return;
+        }
         setError(result.error ?? "Не удалось продолжить");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Ошибка соединения");
       }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Ошибка соединения");
-    } finally {
-      setLoading(false);
-    }
+    });
   };
+
+  const busy = isPending || navigating;
 
   return (
     <main className="flex flex-col min-h-screen p-4">
@@ -72,7 +76,7 @@ export default function UserAgreement({ onAccepted }: UserAgreementProps) {
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                disabled={loading}
+                disabled={busy}
                 className="mt-1 size-4 rounded border-input accent-primary"
                 aria-label="Я согласен с условиями"
               />
@@ -92,10 +96,10 @@ export default function UserAgreement({ onAccepted }: UserAgreementProps) {
 
         <Button
           className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
-          disabled={!agreed || loading}
+          disabled={!agreed || busy}
           onClick={handleSubmit}
         >
-          {loading ? "Загрузка…" : "Продолжить"}
+          {busy ? "Загрузка…" : "Продолжить"}
         </Button>
       </div>
     </main>
