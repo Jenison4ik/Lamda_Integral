@@ -76,8 +76,6 @@ export default function QuizSettings() {
       }
     };
   }, [setAppState]);
-
-  // Обработчик кнопки "Поехали"
   const handleStartQuiz = () => {
     hapticTrigger("medium");
 
@@ -89,8 +87,6 @@ export default function QuizSettings() {
       },
       {
         onSuccess: () => {
-          // Переходим на квиз только после успешного создания сессии
-          // startTransition для плавного перехода UI
           startTransition(() => {
             setAppState("quiz");
           });

@@ -11,13 +11,19 @@ export default function Emoji({
   useEffect(() => {
     switch (type) {
       case "sad":
-        import("./sad.json").then(setAnimationData);
+        import("./sad.json").then((m) =>
+          setAnimationData(structuredClone(m.default))
+        );
         break;
       case "pockerface":
-        import("./pokerface.json").then(setAnimationData);
+        import("./pokerface.json").then((m) =>
+          setAnimationData(structuredClone(m.default))
+        );
         break;
       case "star":
-        import("./star.json").then(setAnimationData);
+        import("./star.json").then((m) =>
+          setAnimationData(structuredClone(m.default))
+        );
         break;
     }
   }, [type]);
