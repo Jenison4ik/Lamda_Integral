@@ -57,3 +57,33 @@ export async function createUser(
   }
 }
 
+export async function checkUser(
+  telegramId: bigint
+): Promise<ControllerResult<CreateUserResult | CreateUserError>> {
+  try {
+    const user = await userService.getByTelegramId(telegramId);
+
+    if (user == null) {
+      return {
+        status: 404,
+        data: { ok: false, error: 'Пользователь не найден' },
+      };
+    }
+
+    return { status: 200, data: { ok: true, user } };
+  } catch (error) {
+    console.error('checkUser error:', error);
+
+    if (error instanceof AppError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+
+    return {
+      status: 500,
+      data: { ok: false, error: 'Не удалось проверить пользователя' },
+    };
+  }
+}

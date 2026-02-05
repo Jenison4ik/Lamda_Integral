@@ -3,6 +3,8 @@
  */
 
 export const queryKeys = {
+  /** Проверка текущего пользователя в БД (GET /api/users?telegramId=...) */
+  checkUser: ["user", "check"] as const,
   // Текущий пользователь (единственный в Mini App)
   currentUser: ["currentUser"] as const,
 

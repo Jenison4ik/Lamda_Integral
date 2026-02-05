@@ -1,10 +1,11 @@
 import { useAppContext } from "@/providers/AppContex";
-import { useUsersInit } from "@/hooks/useUsersInit";
+import { useCheckUser, useUsersInit } from "@/hooks/useUsersInit";
 import { useEffect, useMemo, Suspense, lazy, useState } from "react";
 import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
 import "./style.css";
 import LoadScreen from "./LoadScreen";
+import UserAgreement from "./UserAgreement";
 
 // Lazy-загрузка экранов
 const MainScreen = lazy(() => import("./MainScreen"));
@@ -24,35 +25,34 @@ function FallbackScreen() {
   );
 }
 
-export default function MiniApp() {
+/**
+ * Основной контент Mini App: показывается только когда пользователь уже в БД.
+ * useUsersInit вызывается здесь, поэтому он не выполняется до принятия оферты на UserAgreement.
+ */
+function MiniAppMain() {
   const { appState } = useAppContext();
   const [uiReady, setUiReady] = useState(false);
   const { isReady } = useUsersInit({ logResult: true });
-  // Мемоизированный LoadScreen, чтобы использовать один и тот же элемент
   const loadScreenMemo = useMemo(() => <LoadScreen />, []);
 
-  // Инициализация SDK + preload MainScreen
   useEffect(() => {
-    // SDK
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
     viewport.mount();
     viewport.expand();
 
-    // Preload MainScreen (lazy)
     import("./MainScreen").then(() => setUiReady(true));
 
     return () => {
       swipeBehavior.unmount();
       try {
-        (viewport as any).unmount();
+        (viewport as unknown as { unmount: () => void }).unmount();
       } catch (e) {
         console.error(e);
       }
     };
   }, []);
 
-  // Определяем, какой экран рендерить по appState
   const StateComponent = useMemo(() => {
     switch (appState) {
       case "main":
@@ -68,15 +68,30 @@ export default function MiniApp() {
     }
   }, [appState]);
 
-  // Если данные пользователя или UI ещё не готовы — показываем LoadScreen
   if (!isReady || !uiReady) {
     return loadScreenMemo;
   }
 
-  // Suspense для ленивых экранов, fallback = LoadScreen (мемоизирован)
   return (
     <Suspense fallback={loadScreenMemo}>
       <StateComponent />
     </Suspense>
   );
+}
+
+export default function MiniApp() {
+  const { isReady: isUserReady, isInDb, refetch } = useCheckUser();
+
+  // Пока не узнали, есть ли пользователь в БД — загрузка
+  if (!isUserReady) {
+    return <LoadScreen />;
+  }
+
+  // Пользователя нет в БД — экран оферты; useUsersInit здесь не вызывается
+  if (!isInDb) {
+    return <UserAgreement onAccepted={() => refetch()} />;
+  }
+
+  // Пользователь в БД — показываем основной контент (useUsersInit вызывается внутри)
+  return <MiniAppMain />;
 }

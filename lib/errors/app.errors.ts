@@ -62,6 +62,16 @@ export class UnauthorizedError extends AppError {
 }
 
 /**
+ * Доступ запрещён (авторизован, но нет прав на действие)
+ */
+export class ForbiddenError extends AppError {
+  constructor(message: string = "Доступ запрещён") {
+    super(message, "FORBIDDEN", 403);
+    this.name = "ForbiddenError";
+  }
+}
+
+/**
  * Проверка, является ли ошибка Prisma ошибкой уникальности
  */
 export function isPrismaUniqueConstraintError(error: unknown): boolean {

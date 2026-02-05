@@ -4,10 +4,16 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "./queryKeys";
-import { ensureUser, type EnsureUserResult } from "@/service/users";
+import {
+  ensureUser,
+  checkUser,
+  type EnsureUserResult,
+  type CheckUserResult,
+} from "@/service/users";
 
 /**
- * useEnsureUser - инициализация текущего пользователя (POST запрос).
+ * useEnsureUser — инициализация текущего пользователя (POST /api/users).
+ * После успеха кладёт user в кэш по queryKeys.currentUser.
  */
 export function useEnsureUser() {
   const queryClient = useQueryClient();
@@ -24,7 +30,7 @@ export function useEnsureUser() {
 }
 
 /**
- * useCurrentUser - получить текущего пользователя из кэша.
+ * useCurrentUser — чтение текущего пользователя из кэша (без запроса).
  */
 export function useCurrentUser<TUser = unknown>() {
   return useQuery<TUser | undefined>({
@@ -35,4 +41,17 @@ export function useCurrentUser<TUser = unknown>() {
   });
 }
 
-export type { EnsureUserResult };
+/**
+ * useCheckUser — проверка наличия текущего пользователя в БД (GET /api/users?telegramId=...).
+ * Запрос выполняется с подписанным initData; кэш по queryKeys.checkUser, без ретраев.
+ */
+export function useCheckUser() {
+  return useQuery({
+    queryKey: queryKeys.checkUser,
+    queryFn: checkUser,
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+export type { EnsureUserResult, CheckUserResult };

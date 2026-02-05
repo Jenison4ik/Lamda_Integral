@@ -23,10 +23,12 @@ import {
 import { ControllerResult } from "../types/common.types.js";
 import {
   AppError,
+  ForbiddenError,
   UnauthorizedError,
   ValidationError,
 } from "../errors/app.errors.js";
 import { authService } from "../services/auth.service.js";
+import { telegramAuthService } from "../services/telegram-auth.service.js";
 
 const getAdminPassword = () => process.env.ADMIN_PASSWORD ?? "";
 const getAdminSecret = () => process.env.ADMIN_JWT_SECRET ?? "";
@@ -140,4 +142,24 @@ export async function ensureTelegramUser(
       data: { ok: false, error: "Не удалось выполнить авторизацию" },
     };
   }
+}
+
+/**
+ * Проверяет, что запрос от настоящего пользователя Telegram и что запрашиваемый
+ * telegramId совпадает с пользователем из подписанного initData.
+ * При неверной подписи — UnauthorizedError (401).
+ * При запросе данных другого пользователя — ForbiddenError (403, самозванец).
+ */
+export function verifyTelegramRequest(
+  initData: string,
+  requestedTelegramId: bigint,
+): { user: { id: number } } {
+  const payload = telegramAuthService.verifyInitData(initData);
+  const fromInitData = BigInt(payload.user.id);
+  if (fromInitData !== requestedTelegramId) {
+    throw new ForbiddenError(
+      "Запрос от имени другого пользователя. Доступ запрещён.",
+    );
+  }
+  return payload;
 }
