@@ -1,6 +1,13 @@
 import { useAppContext } from "@/providers/AppContex";
 import { useCheckUser, useUsersInit } from "@/hooks/useUsersInit";
-import { useEffect, useMemo, Suspense, lazy, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  Suspense,
+  lazy,
+  useState,
+  startTransition,
+} from "react";
 import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
 import "./style.css";
@@ -31,21 +38,11 @@ function FallbackScreen() {
  */
 function MiniAppMain() {
   const { appState } = useAppContext();
-  const [uiReady, setUiReady] = useState(false);
-  const { isReady } = useUsersInit({ logResult: true });
+  useUsersInit({ logResult: true });
   const loadScreenMemo = useMemo(() => <LoadScreen />, []);
 
   useEffect(() => {
-    import("./MainScreen").then(() => setUiReady(true));
-
-    return () => {
-      swipeBehavior.unmount();
-      try {
-        (viewport as unknown as { unmount: () => void }).unmount();
-      } catch (e) {
-        console.error(e);
-      }
-    };
+    import("./MainScreen");
   }, []);
 
   const StateComponent = useMemo(() => {
@@ -63,10 +60,6 @@ function MiniAppMain() {
     }
   }, [appState]);
 
-  // if (!isReady || !uiReady) {
-  //   return loadScreenMemo;
-  // }
-
   return (
     <Suspense fallback={loadScreenMemo}>
       <StateComponent />
@@ -81,11 +74,31 @@ export default function MiniApp() {
     swipeBehavior.disableVertical();
     viewport.mount();
     viewport.expand();
+
+    return () => {
+      swipeBehavior.unmount();
+      try {
+        (viewport as unknown as { unmount: () => void }).unmount();
+      } catch (e) {
+        console.error(e);
+      }
+    };
   }, []);
   const { isReady: isUserReady, isInDb, refetch } = useCheckUser();
+  // Отложенный показ контента: переход из LoadScreen делаем через startTransition,
+  // чтобы ре-рендер не блокировал анимацию спиннера на главном потоке.
+  const [showContent, setShowContent] = useState(false);
 
-  // Пока не узнали, есть ли пользователь в БД — загрузка
-  if (!isUserReady) {
+  useEffect(() => {
+    if (!isUserReady) {
+      setShowContent(false);
+      return;
+    }
+    startTransition(() => setShowContent(true));
+  }, [isUserReady]);
+
+  // Пока не узнали, есть ли пользователь в БД — загрузка (или ждём конец transition)
+  if (!isUserReady || !showContent) {
     return <LoadScreen />;
   }
 
