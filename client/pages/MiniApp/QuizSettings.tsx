@@ -67,7 +67,13 @@ export default function QuizSettings() {
 
     return () => {
       backButton.hide();
-      backButton.unmount();
+      try {
+        if (typeof backButton.unmount === "function") {
+          backButton.unmount();
+        }
+      } catch (e) {
+        console.error(e);
+      }
     };
   }, [setAppState]);
 
@@ -137,7 +143,7 @@ export default function QuizSettings() {
 
           {showTextSkeleton ? (
             <div className="grid gap-2 flex-1">
-              <Skeleton className="h-6 w-[200px]" />
+              <Skeleton className="h-6 w-[100px]" />
             </div>
           ) : (
             <CardTitle className="text-xl">Привет 👋, {firstName}!</CardTitle>

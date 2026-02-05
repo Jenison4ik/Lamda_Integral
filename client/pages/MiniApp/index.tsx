@@ -76,9 +76,17 @@ export default function MiniApp() {
     viewport.expand();
 
     return () => {
-      swipeBehavior.unmount();
       try {
-        (viewport as unknown as { unmount: () => void }).unmount();
+        if (typeof swipeBehavior.unmount === "function") {
+          swipeBehavior.unmount();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      try {
+        if (typeof (viewport as unknown as { unmount?: () => void }).unmount === "function") {
+          (viewport as unknown as { unmount: () => void }).unmount();
+        }
       } catch (e) {
         console.error(e);
       }
