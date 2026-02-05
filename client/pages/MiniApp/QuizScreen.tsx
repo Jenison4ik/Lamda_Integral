@@ -62,7 +62,7 @@ export default function QuizScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswerId, setSelectedAnswerId] = useState<number | null>(null);
   const [answerResult, setAnswerResult] = useState<SubmitAnswerResponse | null>(
-    null,
+    null
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -70,7 +70,7 @@ export default function QuizScreen() {
   const { data: session } = useCurrentSession();
   const { data: questionData, isLoading: isLoadingQuestion } = useQuestion(
     session?.id,
-    currentIndex,
+    currentIndex
   );
   const prefetchQuestion = usePrefetchQuestion();
   const submitMutation = useSubmitAnswer();
@@ -130,7 +130,7 @@ export default function QuizScreen() {
           setIsSubmitting(false);
           hapticTrigger("heavy");
         },
-      },
+      }
     );
   };
 
@@ -175,7 +175,7 @@ export default function QuizScreen() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-4">
+    <main className="flex flex-col items-center justify-center min-h-screen gap-4 p-bottom-4">
       {/* Заголовок с прогрессом */}
       <div className="flex flex-row items-center justify-between gap-4 text-sm w-full max-w-sm">
         {isLoadingQuestion ? (

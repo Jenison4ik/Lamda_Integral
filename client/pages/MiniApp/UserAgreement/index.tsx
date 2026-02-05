@@ -46,7 +46,7 @@ export default function UserAgreement({ onAccepted }: UserAgreementProps) {
             <h1 className="text-2xl font-bold mb-2 text-center">
               Lambda Integral
             </h1>
-            <p className="text-muted-foreground text-sm mb-6">
+            <p className="text-muted-foreground text-sm mb-6 text-center">
               Для использования приложения необходимо принять условия{" "}
               <a
                 href="https://telegra.ph/Usloviya-ispolzovaniya-Lambda-Integral-02-02"

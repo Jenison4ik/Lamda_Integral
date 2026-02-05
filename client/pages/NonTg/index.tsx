@@ -19,7 +19,7 @@ export default function NonTg() {
         />
       </div>
       <div className="relative flex flex-col items-center justify-center gap-4 h-full w-full">
-        <h1 className="font-bold text-6xl text-center">Lamda Integrall</h1>
+        <h1 className="font-bold text-6xl text-center">Lambda Integrall</h1>
         <p className="text-center">
           Это телеграм бот для тренировки по интегрированию, вы можете
           опробовать его прямо сейчас
@@ -30,7 +30,7 @@ export default function NonTg() {
             "gap-2 w-auto cursor-pointer hover:scale-105 transition-all duration-300 bg-primary text-white"
           }
         >
-        <img src="./img/telegram.svg" alt="" className="w-[15px] h-auto"/>
+          <img src="./img/telegram.svg" alt="" className="w-[15px] h-auto" />
           Попробовать сейчас
         </Button>
       </div>
