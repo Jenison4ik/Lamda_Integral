@@ -36,11 +36,11 @@ export default function UserAgreement({ onAccepted }: UserAgreementProps) {
   return (
     <main className="flex flex-col min-h-screen p-4">
       <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
-        <Card className="w-full max-w-sm flex flex-col items-center justify-start">
-          <CardContent>
+        <Card>
+          <CardContent className="w-full max-w-sm flex flex-col items-center justify-start">
             <AnimatedLogo />
             <h1 className="text-2xl font-bold mb-2 text-center">
-              Пользовательское соглашение
+              Lambda Integral
             </h1>
             <p className="text-muted-foreground text-sm mb-6">
               Для использования приложения необходимо принять условия{" "}

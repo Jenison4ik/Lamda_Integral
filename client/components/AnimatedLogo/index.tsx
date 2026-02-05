@@ -1,6 +1,16 @@
+import { useEffect, useState } from "react";
 import styles from "./style.module.css";
 
 export default function AnimatedLogo() {
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setActive(true));
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   return (
     <svg
       width="182"
@@ -8,7 +18,7 @@ export default function AnimatedLogo() {
       viewBox="0 0 182 142"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={styles.active}
+      className={active ? styles.active : undefined}
     >
       <path
         fillRule="evenodd"
@@ -17,7 +27,7 @@ export default function AnimatedLogo() {
         fill="black"
         stroke="black"
         strokeWidth="1.5"
-        className={styles['svg-elem-1']}
+        className={styles["svg-elem-1"]}
       />
     </svg>
   );
