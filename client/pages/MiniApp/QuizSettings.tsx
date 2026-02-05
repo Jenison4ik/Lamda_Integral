@@ -41,7 +41,7 @@ export default function QuizSettings() {
   const [imageError, setImageError] = useState(false);
   const [isTransitioning, startTransition] = useTransition();
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
-    "easy",
+    "easy"
   );
   // React Query mutation для создания сессии
   const createSession = useCreateSession();
@@ -93,7 +93,7 @@ export default function QuizSettings() {
           // TODO: показать toast с ошибкой
           console.error("Ошибка создания сессии:", error);
         },
-      },
+      }
     );
   };
 
@@ -234,7 +234,6 @@ export default function QuizSettings() {
                   Уровень сложности
                 </FieldLabel>
                 <Select
-
                   defaultValue="easy"
                   disabled={isPending}
                   onValueChange={(value) => {
@@ -242,7 +241,7 @@ export default function QuizSettings() {
                     hapticTrigger("soft");
                   }}
                 >
-                  <SelectTrigger className="min-w-[100px]">
+                  <SelectTrigger className="min-w-[200px]">
                     <SelectValue placeholder="сложность" />
                   </SelectTrigger>
                   <SelectContent>
