@@ -110,8 +110,8 @@ export default function QuizSettings() {
 
   return (
     <main>
-      <Card>
-        <CardHeader className="flex items-center gap-2 w-full max-w-sm">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="flex items-center gap-2">
           <div className="w-[50px] h-[50px] rounded-full shrink-0 relative">
             {photoUrl && (
               <>

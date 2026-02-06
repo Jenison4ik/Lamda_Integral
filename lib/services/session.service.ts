@@ -153,8 +153,110 @@ export async function submitAnswer(
     },
   });
 
+  // Если это был последний вопрос — помечаем сессию завершённой
+  const answeredCount = await prisma.sessionAnswer.count({
+    where: { sessionId },
+  });
+  const totalInSession = await prisma.sessionQuestion.count({
+    where: { sessionId },
+  });
+  if (answeredCount >= totalInSession) {
+    await prisma.quizSession.update({
+      where: { id: sessionId },
+      data: { finishedAt: new Date() },
+    });
+  }
+
   return {
     isCorrect: answerOption.isCorrect,
     correctAnswerId: correctAnswer?.id ?? answerId,
+  };
+}
+
+/**
+ * Результат по одному вопросу для экрана результатов.
+ */
+export interface SessionResultDetailDto {
+  questionId: number;
+  questionText: string;
+  chosenAnswerId: number;
+  chosenAnswerText: string;
+  correctAnswerId: number;
+  correctAnswerText: string;
+  isCorrect: boolean;
+}
+
+/**
+ * Результаты завершённой сессии (для API).
+ */
+export interface SessionResultsDto {
+  totalQuestions: number;
+  correctAnswers: number;
+  percentage: number;
+  details: SessionResultDetailDto[];
+}
+
+/**
+ * Получает результаты сессии (все ответы + правильные варианты).
+ * Сессия может быть ещё не завершена — тогда считаем по уже данным ответам.
+ */
+export async function getResults(
+  sessionId: number,
+): Promise<SessionResultsDto | null> {
+  const session = await prisma.quizSession.findUnique({
+    where: { id: sessionId },
+    include: {
+      questions: { orderBy: { orderIndex: "asc" as const }, include: { question: { include: { answerOptions: true } } } },
+      answers: {
+        include: {
+          chosenOption: true,
+        },
+      },
+    },
+  });
+
+  if (!session) {
+    return null;
+  }
+
+  const totalQuestions = session.questions.length;
+  const answersByQuestion = new Map(
+    session.answers.map((a) => [a.questionId, a]),
+  );
+
+  let correctAnswers = 0;
+  const details: SessionResultDetailDto[] = [];
+
+  for (const sq of session.questions) {
+    const q = sq.question;
+    const userAnswer = answersByQuestion.get(q.id);
+    const correctOption = q.answerOptions.find((o) => o.isCorrect);
+
+    if (!userAnswer) {
+      continue; // пропускаем неотвеченные (на случай незавершённой сессии)
+    }
+
+    const isCorrect = userAnswer.chosenOption.isCorrect;
+    if (isCorrect) correctAnswers++;
+
+    details.push({
+      questionId: q.id,
+      questionText: q.text,
+      chosenAnswerId: userAnswer.chosenOptionId,
+      chosenAnswerText: userAnswer.chosenOption.text,
+      correctAnswerId: correctOption?.id ?? userAnswer.chosenOptionId,
+      correctAnswerText: correctOption?.text ?? userAnswer.chosenOption.text,
+      isCorrect,
+    });
+  }
+
+  const percentage =
+    totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+
+  return {
+    totalQuestions,
+    correctAnswers,
+    percentage,
+    details,
   };
 }

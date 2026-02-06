@@ -18,6 +18,7 @@ import {
   SessionDto,
   SessionQuestionResult,
   SubmitAnswerResult,
+  SessionResultsResult,
 } from "../types/session.types.js";
 import { ControllerResult } from "../types/common.types.js";
 import { AppError } from "../errors/app.errors.js";
@@ -220,6 +221,43 @@ export async function submitAnswer(
     return {
       status: 500,
       data: { ok: false, error: "Не удалось сохранить ответ" },
+    };
+  }
+}
+
+/**
+ * Получение результатов сессии (ответы и правильность).
+ */
+export async function getResults(
+  sessionId: number,
+): Promise<ControllerResult<SessionResultsResult | CreateSessionError>> {
+  try {
+    const result = await sessionService.getResults(sessionId);
+
+    if (!result) {
+      return {
+        status: 404,
+        data: { ok: false, error: "Сессия не найдена" },
+      };
+    }
+
+    return {
+      status: 200,
+      data: result,
+    };
+  } catch (error) {
+    console.error("getResults error:", error);
+
+    if (error instanceof AppError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+
+    return {
+      status: 500,
+      data: { ok: false, error: "Не удалось получить результаты" },
     };
   }
 }

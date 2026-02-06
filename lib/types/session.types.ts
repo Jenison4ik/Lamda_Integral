@@ -76,3 +76,24 @@ export interface SubmitAnswerResult {
   isCorrect: boolean;
   correctAnswerId: number;
 }
+
+// =====================
+// Результаты сессии
+// =====================
+
+export interface SessionResultDetailResult {
+  questionId: number;
+  questionText: string;
+  chosenAnswerId: number;
+  chosenAnswerText: string;
+  correctAnswerId: number;
+  correctAnswerText: string;
+  isCorrect: boolean;
+}
+
+export interface SessionResultsResult {
+  totalQuestions: number;
+  correctAnswers: number;
+  percentage: number;
+  details: SessionResultDetailResult[];
+}
