@@ -10,6 +10,10 @@ export default defineConfig({
   build: {
     outDir: "../dist/client",
     emptyOutDir: true,
+    // Отключаем предзагрузку модулей для улучшения производительности
+    modulePreload: {
+      polyfill: false,
+    },
       rollupOptions: {
         onwarn(warning, warn) {
           // Игнорируем предупреждение об использовании eval в lottie-web
@@ -99,7 +103,7 @@ export default defineConfig({
               return "non-tg";
             }
 
-            // MathBlock компонент (использует katex)
+            // MathBlock компонент (использует katex) - загружается только на QuizScreen/ResultScreen
             if (id.includes("/components/MathBlock")) {
               return "math-block";
             }
@@ -109,8 +113,32 @@ export default defineConfig({
               return "dark-veil";
             }
 
-            // Все UI компоненты в один чанк (убрали разделение на admin-ui и ui-components
-            // чтобы избежать циклических зависимостей)
+            // Критичные UI компоненты для главной страницы (Button, Spinner)
+            // Эти компоненты используются на MainScreen и LoadScreen
+            if (
+              id.includes("/components/ui/button") ||
+              id.includes("/components/ui/spinner")
+            ) {
+              return "ui-core";
+            }
+
+            // Некритичные UI компоненты - загружаются только на других страницах
+            // (Select, RadioGroup, Slider, Card, Field и т.д.)
+            if (
+              id.includes("/components/ui/select") ||
+              id.includes("/components/ui/radio-group") ||
+              id.includes("/components/ui/slider") ||
+              id.includes("/components/ui/card") ||
+              id.includes("/components/ui/field") ||
+              id.includes("/components/ui/input") ||
+              id.includes("/components/ui/badge") ||
+              id.includes("/components/ui/skeleton") ||
+              id.includes("/components/ui/separator")
+            ) {
+              return "ui-extended";
+            }
+
+            // Остальные UI компоненты
             if (id.includes("/components/ui/")) {
               return "ui-components";
             }

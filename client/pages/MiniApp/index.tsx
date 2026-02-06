@@ -5,8 +5,6 @@ import {
   useMemo,
   Suspense,
   lazy,
-  useState,
-  startTransition,
 } from "react";
 import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
@@ -90,22 +88,17 @@ export default function MiniApp() {
       }
     };
   }, []);
+
   const { isReady: isUserReady, isInDb, refetch } = useCheckUser();
-  // Отложенный показ контента: переход из LoadScreen делаем через startTransition,
-  // чтобы ре-рендер не блокировал анимацию спиннера на главном потоке.
-  const [showContent, setShowContent] = useState(false);
+  
+  // Мемоизируем LoadScreen, чтобы он не пересоздавался при каждом рендере
+  // и оставался стабильным пока мы не готовы показать контент
+  const loadScreen = useMemo(() => <LoadScreen />, []);
 
-  useEffect(() => {
-    if (!isUserReady) {
-      setShowContent(false);
-      return;
-    }
-    startTransition(() => setShowContent(true));
-  }, [isUserReady]);
-
-  // Пока не узнали, есть ли пользователь в БД — загрузка (или ждём конец transition)
-  if (!isUserReady || !showContent) {
-    return <LoadScreen />;
+  // Пока не узнали, есть ли пользователь в БД — показываем LoadScreen
+  // и ничего с ним не делаем, чтобы избежать подлагиваний
+  if (!isUserReady) {
+    return loadScreen;
   }
 
   // Пользователя нет в БД — экран оферты; useUsersInit здесь не вызывается
