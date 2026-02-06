@@ -111,7 +111,7 @@ export default function QuizSettings() {
   return (
     <main>
       <Card>
-        <CardHeader className="flex items-center gap-2 ">
+        <CardHeader className="flex items-center gap-2 w-full max-w-sm">
           <div className="w-[50px] h-[50px] rounded-full shrink-0 relative">
             {photoUrl && (
               <>
@@ -243,7 +243,7 @@ export default function QuizSettings() {
                     hapticTrigger("soft");
                   }}
                 >
-                  <SelectTrigger className="min-w-[50%] max-w-[200px]">
+                  <SelectTrigger className="w-[30%] max-w-[200px] min-w-[120px]">
                     <SelectValue placeholder="сложность" />
                   </SelectTrigger>
                   <SelectContent>
@@ -258,7 +258,7 @@ export default function QuizSettings() {
         </CardContent>
       </Card>
       <Button
-        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer"
+        className="w-full mt-4 bg-primary text-background hover:bg-primary/80 text-base font-medium cursor-pointer max-w-sm"
         onClick={handleStartQuiz}
         disabled={isPending}
       >
