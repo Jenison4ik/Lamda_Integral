@@ -243,7 +243,7 @@ export default function QuizSettings() {
                     hapticTrigger("soft");
                   }}
                 >
-                  <SelectTrigger className="min-w-[200px]">
+                  <SelectTrigger className="min-w-[50%] max-w-[200px]">
                     <SelectValue placeholder="сложность" />
                   </SelectTrigger>
                   <SelectContent>
