@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ensureUser } from "@/service/users";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import AnimatedLogo from "@/components/AnimatedLogo";
 import Lottie from "lottie-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -40,11 +39,11 @@ export default function UserAgreement({ onAccepted }: UserAgreementProps) {
   const busy = isPending || navigating;
 
   return (
-    <main className="flex flex-col min-h-screen p-4">
+    <main className="flex flex-col items-center justify-center min-h-screen gap-4 p-bottom-4">
       <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
-        <Card>
-          <CardContent className="w-full max-w-sm flex flex-col items-center justify-start">
-            <Folder className="w-[300px] h-[300px]" />
+        <Card className="flex flex-col items-center justify-center">
+          <CardContent className="w-full max-w-sm flex flex-col items-center justify-center">
+            <Folder className="w-[250px] h-[250px]" />
             <h1 className="text-2xl font-bold text-center">
               Lambda Integral
             </h1>
@@ -120,7 +119,7 @@ function Folder({ className, ...props }: React.ComponentProps<"div">) {
     import("./folder.json").then((m) =>
       setAnimationData(structuredClone(m.default))
     );
-  })
+  }, [])
 
   return <div className={className} {...props}>
     {animationData ? (
