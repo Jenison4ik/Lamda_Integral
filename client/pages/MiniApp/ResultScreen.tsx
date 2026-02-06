@@ -34,13 +34,17 @@ export default function ResultScreen() {
 
   if (isLoading) {
     return (
-      <main className="flex flex-col items-center justify-center min-h-screen p-4">
-        <Skeleton className="h-16 w-16 rounded-full mb-4" />
-        <Skeleton className="h-8 w-48 mb-2" />
-        <Skeleton className="h-6 w-32 mb-6" />
-        <Button disabled className="w-full max-w-xs">
-          Загрузка...
-        </Button>
+      <main className="flex flex-col items-center min-h-screen p-4 pb-8">
+        <Skeleton className="h-16 w-16 rounded-full shrink-0" />
+        <Skeleton className="h-7 w-48 mt-2 mb-1" />
+        <Skeleton className="h-4 w-32 mb-6" />
+        <Card className="w-full max-w-sm mb-6">
+          <CardContent className="pt-6">
+            <Skeleton className="h-10 w-20 mx-auto" />
+          </CardContent>
+        </Card>
+        <Skeleton className="h-10 w-full max-w-sm mb-4" />
+        <Skeleton className="h-10 w-full max-w-sm mt-auto" />
       </main>
     );
   }

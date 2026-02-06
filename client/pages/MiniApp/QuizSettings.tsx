@@ -109,7 +109,7 @@ export default function QuizSettings() {
   }, [photoUrl]);
 
   return (
-    <main>
+    <main className="flex flex-col items-center justify-center min-h-screen gap-4 p-bottom-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="flex items-center gap-2">
           <div className="w-[50px] h-[50px] rounded-full shrink-0 relative">
