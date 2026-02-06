@@ -10,104 +10,113 @@ export default defineConfig({
   build: {
     outDir: "../dist/client",
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          // React и React-DOM в отдельные чанки
-          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
-            if (id.includes("react-dom")) {
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // Игнорируем предупреждение об использовании eval в lottie-web
+          if (warning.code === "EVAL" && warning.id?.includes("lottie")) {
+            return;
+          }
+          warn(warning);
+        },
+        output: {
+          manualChunks: (id) => {
+            // ВАЖНО: Проверяем специфичные библиотеки ПЕРЕД общими проверками
+            // чтобы избежать циклических зависимостей
+
+            // React и React-DOM в отдельные чанки (проверяем первыми)
+            if (id.includes("node_modules/react-dom")) {
               return "vendor-react-dom";
             }
-            return "vendor-react";
-          }
+            if (id.includes("node_modules/react/")) {
+              return "vendor-react";
+            }
 
-          // KaTeX (LaTeX рендеринг) - используется только в MathBlock
-          if (id.includes("node_modules/katex")) {
-            return "vendor-katex";
-          }
+            // KaTeX (LaTeX рендеринг) - используется только в MathBlock
+            if (id.includes("node_modules/katex")) {
+              return "vendor-katex";
+            }
 
-          // OGL (WebGL библиотека) - используется только в DarkVeil
-          if (id.includes("node_modules/ogl")) {
-            return "vendor-ogl";
-          }
+            // OGL (WebGL библиотека) - используется только в DarkVeil
+            if (id.includes("node_modules/ogl")) {
+              return "vendor-ogl";
+            }
 
-          // Иконки в отдельные чанки
-          if (id.includes("node_modules/lucide-react")) {
-            return "vendor-lucide";
-          }
-          if (id.includes("node_modules/react-icons")) {
-            return "vendor-react-icons";
-          }
+            // Lottie (анимации) - используется в Emoji компоненте
+            if (id.includes("node_modules/lottie")) {
+              return "vendor-lottie";
+            }
 
-          // Vercel Speed Insights
-          if (id.includes("node_modules/@vercel/speed-insights")) {
-            return "vendor-speed-insights";
-          }
+            // Иконки в отдельные чанки
+            if (id.includes("node_modules/lucide-react")) {
+              return "vendor-lucide";
+            }
+            if (id.includes("node_modules/react-icons")) {
+              return "vendor-react-icons";
+            }
 
-          // Telegram SDK в отдельный чанк
-          if (id.includes("@tma.js")) {
-            return "telegram-sdk";
-          }
+            // Vercel Speed Insights
+            if (id.includes("node_modules/@vercel/speed-insights")) {
+              return "vendor-speed-insights";
+            }
 
-          // Radix UI компоненты отдельно
-          if (id.includes("node_modules/@radix-ui")) {
-            return "vendor-radix";
-          }
+            // Telegram SDK в отдельный чанк
+            if (id.includes("@tma.js")) {
+              return "telegram-sdk";
+            }
 
-          // Tailwind и утилиты
-          if (
-            id.includes("node_modules/tailwind") ||
-            id.includes("node_modules/clsx") ||
-            id.includes("node_modules/tailwind-merge") ||
-            id.includes("node_modules/class-variance-authority")
-          ) {
-            return "vendor-tailwind";
-          }
+            // Radix UI компоненты отдельно
+            if (id.includes("node_modules/@radix-ui")) {
+              return "vendor-radix";
+            }
 
-          // Админ-панель в отдельный чанк
-          if (id.includes("/pages/Admin")) {
-            return "admin";
-          }
+            // Tailwind и утилиты
+            if (
+              id.includes("node_modules/tailwind") ||
+              id.includes("node_modules/clsx") ||
+              id.includes("node_modules/tailwind-merge") ||
+              id.includes("node_modules/class-variance-authority")
+            ) {
+              return "vendor-tailwind";
+            }
 
-          // NonTg страница в отдельный чанк
-          if (id.includes("/pages/NonTg")) {
-            return "non-tg";
-          }
+            // React Query
+            if (id.includes("node_modules/@tanstack/react-query")) {
+              return "vendor-react-query";
+            }
 
-          // MathBlock компонент (использует katex)
-          if (id.includes("/components/MathBlock")) {
-            return "math-block";
-          }
+            // Остальные node_modules в vendor чанк (проверяем после всех специфичных)
+            if (id.includes("node_modules")) {
+              return "vendor";
+            }
 
-          // DarkVeil компонент (использует ogl)
-          if (id.includes("/components/DarkVeil")) {
-            return "dark-veil";
-          }
+            // Админ-панель в отдельный чанк
+            if (id.includes("/pages/Admin")) {
+              return "admin";
+            }
 
-          // UI компоненты админ-панели в отдельный чанк
-          if (
-            id.includes("/components/ui/table") ||
-            id.includes("/components/ui/card") ||
-            id.includes("/components/ui/input") ||
-            id.includes("/components/ui/label") ||
-            id.includes("/components/ui/alert") ||
-            id.includes("/components/ui/badge")
-          ) {
-            return "admin-ui";
-          }
+            // NonTg страница в отдельный чанк
+            if (id.includes("/pages/NonTg")) {
+              return "non-tg";
+            }
 
-          // Остальные UI компоненты
-          if (id.includes("/components/ui/")) {
-            return "ui-components";
-          }
+            // MathBlock компонент (использует katex)
+            if (id.includes("/components/MathBlock")) {
+              return "math-block";
+            }
 
-          // Остальные node_modules в vendor чанк
-          if (id.includes("node_modules")) {
-            return "vendor";
-          }
+            // DarkVeil компонент (использует ogl)
+            if (id.includes("/components/DarkVeil")) {
+              return "dark-veil";
+            }
+
+            // Все UI компоненты в один чанк (убрали разделение на admin-ui и ui-components
+            // чтобы избежать циклических зависимостей)
+            if (id.includes("/components/ui/")) {
+              return "ui-components";
+            }
+          },
         },
       },
-    },
   },
   server: {
     port: 3000,

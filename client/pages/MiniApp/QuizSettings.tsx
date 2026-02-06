@@ -13,9 +13,7 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -119,6 +117,9 @@ export default function QuizSettings() {
                   src={photoUrl}
                   alt="user"
                   className="w-full h-full rounded-full object-cover"
+                  loading="lazy"
+                  fetchPriority="low"
+                  decoding="async"
                   style={{
                     opacity: imageLoaded && !imageError ? 1 : 0,
                     position:

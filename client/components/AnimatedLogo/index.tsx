@@ -5,8 +5,10 @@ export default function AnimatedLogo() {
   const [active, setActive] = useState(false);
 
   useEffect(() => {
+    // Используем один requestAnimationFrame для более быстрого отображения
+    // и setTimeout с минимальной задержкой для обеспечения отрисовки
     const id = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setActive(true));
+      setActive(true);
     });
     return () => cancelAnimationFrame(id);
   }, []);
@@ -19,6 +21,7 @@ export default function AnimatedLogo() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={active ? styles.active : undefined}
+      aria-label="Lambda Integral Logo"
     >
       <path
         fillRule="evenodd"

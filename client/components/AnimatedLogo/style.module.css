@@ -8,6 +8,7 @@ svg .svg-elem-1 {
   stroke-dashoffset: 1234.84765625px;
   stroke-dasharray: 1234.84765625px;
   fill: transparent;
+  will-change: stroke-dashoffset, fill;
   -webkit-transition:
     stroke-dashoffset 1.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0s,
     fill 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.8s;

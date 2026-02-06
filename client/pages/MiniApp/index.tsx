@@ -41,9 +41,7 @@ function MiniAppMain() {
   useUsersInit({ logResult: true });
   const loadScreenMemo = useMemo(() => <LoadScreen />, []);
 
-  useEffect(() => {
-    import("./MainScreen");
-  }, []);
+  // Удаляем предзагрузку MainScreen - lazy loading уже обрабатывает это
 
   const StateComponent = useMemo(() => {
     switch (appState) {
