@@ -1,4 +1,4 @@
-import { useEffect, useState, useTransition, useRef } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { ensureUser } from "@/service/users";
 import { cn } from "@/lib/utils";
@@ -112,32 +112,18 @@ export default function UserAgreement({ onAccepted }: UserAgreementProps) {
 
 
 function Folder({ className, ...props }: React.ComponentProps<"div">) {
+
   const [animationData, setAnimationData] = useState<any>(null);
-  const lottieRef = useRef<any>(null);
 
   useEffect(() => {
     import("./folder.json").then((m) =>
       setAnimationData(structuredClone(m.default))
     );
-  }, []);
-
-  const handleComplete = () => {
-    if (lottieRef.current) {
-      setTimeout(() => {
-        lottieRef.current?.goToAndPlay(0);
-      }, 700);
-    }
-  };
+  }, [])
 
   return <div className={className} {...props}>
     {animationData ? (
-      <Lottie
-        lottieRef={lottieRef}
-        animationData={animationData}
-        autoplay
-        onComplete={handleComplete}
-        style={{ width: "100%", height: "100%" }}
-      />
+      <Lottie animationData={animationData} loop autoplay style={{ width: "100%", height: "100%" }} />
     ) : (
       <Skeleton className="w-full h-full rounded-[10px]" style={{ width: "100%", height: "100%" }} />
     )}
