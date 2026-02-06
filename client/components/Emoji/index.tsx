@@ -4,9 +4,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Emoji({
   type,
+  className,
+  ...props
 }: {
   type: "sad" | "pockerface" | "star";
-}) {
+} & React.ComponentProps<"div">) {
   const [animationData, setAnimationData] = useState<any>(null);
   useEffect(() => {
     switch (type) {
@@ -29,11 +31,11 @@ export default function Emoji({
   }, [type]);
 
   return (
-    <div style={{ width: 100, height: 100 }}>
+    <div className={className} {...props}>
       {animationData ? (
-        <Lottie animationData={animationData} loop autoplay />
+        <Lottie animationData={animationData} loop autoplay style={{ width: "100%", height: "100%" }} />
       ) : (
-        <Skeleton className="w-full h-full border-radius-full" />
+        <Skeleton className="w-full h-full rounded-full" style={{ width: "100%", height: "100%" }} />
       )}
     </div>
   );

@@ -52,7 +52,7 @@ export default function ResultScreen() {
   if (isError || !results) {
     return (
       <main className="flex flex-col items-center justify-center min-h-screen p-4">
-        <Emoji type="sad" />
+        <Emoji type="sad" className="w-[200px] h-[200px]" />
         <h1 className="text-xl font-bold mb-2">Ошибка загрузки</h1>
         <p className="text-muted-foreground mb-6 text-center text-sm">
           {error instanceof Error ? error.message : "Не удалось загрузить результаты"}
