@@ -1,24 +1,19 @@
 import { useAppContext } from "@/providers/AppContex";
 import { useCheckUser, useUsersInit } from "@/hooks/useUsersInit";
-import {
-  useEffect,
-  useMemo,
-  Suspense,
-  lazy,
-} from "react";
+import { useEffect, Suspense, lazy } from "react";
 import { swipeBehavior, viewport } from "@tma.js/sdk-react";
 
 import "./style.css";
 import LoadScreen from "./LoadScreen";
 import UserAgreement from "./UserAgreement";
 
-// Lazy-загрузка экранов
+// Lazy screens
 const MainScreen = lazy(() => import("./MainScreen"));
 const QuizSettings = lazy(() => import("./QuizSettings"));
 const QuizScreen = lazy(() => import("./QuizScreen"));
 const ResultScreen = lazy(() => import("./ResultScreen"));
 
-// Фолбэк для неизвестного состояния
+// ---------- Fallback ----------
 function FallbackScreen() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -30,82 +25,86 @@ function FallbackScreen() {
   );
 }
 
-/**
- * Основной контент Mini App: показывается только когда пользователь уже в БД.
- * useUsersInit вызывается здесь, поэтому он не выполняется до принятия оферты на UserAgreement.
- */
+// ---------- Main content ----------
 function MiniAppMain() {
   const { appState } = useAppContext();
+
+  // Запускается только когда пользователь уже в БД
   useUsersInit({ logResult: true });
-  const loadScreenMemo = useMemo(() => <LoadScreen />, []);
 
-  // Удаляем предзагрузку MainScreen - lazy loading уже обрабатывает это
+  // Выбор экрана без useMemo — он тут не нужен
+  let Screen: React.ComponentType;
 
-  const StateComponent = useMemo(() => {
-    switch (appState) {
-      case "main":
-        return MainScreen;
-      case "difficulty-pick":
-        return QuizSettings;
-      case "quiz":
-        return QuizScreen;
-      case "result":
-        return ResultScreen;
-      default:
-        return FallbackScreen;
-    }
-  }, [appState]);
+  switch (appState) {
+    case "main":
+      Screen = MainScreen;
+      break;
+    case "difficulty-pick":
+      Screen = QuizSettings;
+      break;
+    case "quiz":
+      Screen = QuizScreen;
+      break;
+    case "result":
+      Screen = ResultScreen;
+      break;
+    default:
+      Screen = FallbackScreen;
+  }
 
   return (
-    <Suspense fallback={loadScreenMemo}>
-      <StateComponent />
+    <Suspense fallback={null}>
+      <Screen />
     </Suspense>
   );
 }
 
+// ---------- Root ----------
 export default function MiniApp() {
-  //Настройки отображения приложения
+  const { isReady: isUserReady, isInDb, refetch } = useCheckUser();
+
+  // Telegram MiniApp viewport setup
   useEffect(() => {
     swipeBehavior.mount();
     swipeBehavior.disableVertical();
+
     viewport.mount();
     viewport.expand();
 
+    // Prefetch main screen chunk (убирает белый флеш)
+    import("./MainScreen");
+
     return () => {
       try {
-        if (typeof swipeBehavior.unmount === "function") {
-          swipeBehavior.unmount();
-        }
+        swipeBehavior.unmount?.();
       } catch (e) {
         console.error(e);
       }
+
       try {
-        if (typeof (viewport as unknown as { unmount?: () => void }).unmount === "function") {
-          (viewport as unknown as { unmount: () => void }).unmount();
-        }
+        (viewport as any).unmount?.();
       } catch (e) {
         console.error(e);
       }
     };
   }, []);
 
-  const { isReady: isUserReady, isInDb, refetch } = useCheckUser();
-  
-  // Мемоизируем LoadScreen, чтобы он не пересоздавался при каждом рендере
-  // и оставался стабильным пока мы не готовы показать контент
-  const loadScreen = useMemo(() => <LoadScreen />, []);
+  // Loader показывается поверх всего и не размонтируется
+  const showLoader = !isUserReady;
 
-  // Пока не узнали, есть ли пользователь в БД — показываем LoadScreen
-  // и ничего с ним не делаем, чтобы избежать подлагиваний
-  if (!isUserReady) {
-    return loadScreen;
-  }
+  return (
+    <>
+      {/* Основное содержимое */}
+      {isUserReady && !isInDb && <UserAgreement onAccepted={refetch} />}
 
-  // Пользователя нет в БД — экран оферты; useUsersInit здесь не вызывается
-  if (!isInDb) {
-    return <UserAgreement onAccepted={() => refetch()} />;
-  }
+      {isUserReady && isInDb && <MiniAppMain />}
 
-  // Пользователь в БД — показываем основной контент (useUsersInit вызывается внутри)
-  return <MiniAppMain />;
+      {/* Overlay loader */}
+      {showLoader && (
+        <div className="fixed inset-0 z-50">
+          <LoadScreen />
+        </div>
+      )}
+    </>
+  );
 }

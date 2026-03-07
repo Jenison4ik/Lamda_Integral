@@ -3,7 +3,7 @@ import { memo } from "react";
 // Используем простой CSS spinner вместо компонента с lucide-react
 // чтобы не загружать всю библиотеку иконок на главной странице
 // Мемоизируем компонент, чтобы он не пересоздавался при каждом рендере
-const LoadScreen = memo(function LoadScreen() {
+const LoadScreen = memo(function () {
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
       <div className="flex items-center gap-3">
