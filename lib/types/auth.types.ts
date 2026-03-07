@@ -41,3 +41,21 @@ export interface TelegramAuthError {
   ok: false;
   error: string;
 }
+
+/** Payload для POST /auth/telegram-login (Telegram Login Widget, native) */
+export interface TelegramLoginInput {
+  id: number;
+  first_name: string;
+  username?: string;
+  auth_date: number;
+  hash: string;
+}
+
+export interface TelegramLoginResult {
+  token: string;
+}
+
+export interface TelegramLoginError {
+  ok: false;
+  error: string;
+}

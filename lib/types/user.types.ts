@@ -8,6 +8,7 @@
 export interface CreateUserInput {
   telegramId: number | string;
   username?: string | null;
+  firstName?: string | null;
 }
 
 /**
@@ -18,8 +19,18 @@ export interface UserDto {
   id: number;
   telegramId: string;
   username: string | null;
+  firstName: string | null;
   lastSeen: string | null;
   createdAt: string;
+}
+
+/**
+ * Входные данные для upsert при Telegram Login (native)
+ */
+export interface TelegramLoginUserInput {
+  telegramId: bigint;
+  username?: string | null;
+  firstName?: string | null;
 }
 
 /**

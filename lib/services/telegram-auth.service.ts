@@ -1,5 +1,46 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import {
+  createHash,
+  createHmac,
+  timingSafeEqual,
+} from "node:crypto";
 import { UnauthorizedError, ValidationError } from "../errors/app.errors.js";
+
+/**
+ * Payload от Telegram Login Widget (native iOS/Android).
+ * @see https://core.telegram.org/widgets/login#checking-authorization
+ */
+export interface TelegramLoginPayload {
+  id: number;
+  first_name: string;
+  username?: string;
+  auth_date: number;
+  hash: string;
+}
+
+/**
+ * Проверяет подпись данных Telegram Login (OAuth-виджет для нативных приложений).
+ * Алгоритм: data_check_string из полей (кроме hash), secret_key = SHA256(bot_token), HMAC-SHA256.
+ */
+export function verifyTelegramLogin(
+  data: TelegramLoginPayload,
+  botToken: string,
+): boolean {
+  const { hash, ...fields } = data;
+  const checkString = Object.keys(fields)
+    .sort()
+    .map((k) => `${k}=${(fields as Record<string, unknown>)[k]}`)
+    .join("\n");
+
+  const secret = createHash("sha256").update(botToken).digest();
+  const hmac = createHmac("sha256", secret)
+    .update(checkString)
+    .digest("hex");
+
+  if (hash.length !== hmac.length || !timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(hmac, "hex"))) {
+    return false;
+  }
+  return true;
+}
 
 export interface TelegramUser {
   id: number;
@@ -94,4 +135,5 @@ export function verifyInitData(initDataRaw: string): TelegramAuthPayload {
 
 export const telegramAuthService = {
   verifyInitData,
+  verifyTelegramLogin,
 };

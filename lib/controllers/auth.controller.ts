@@ -19,6 +19,9 @@ import {
   TelegramAuthInput,
   TelegramAuthResult,
   TelegramAuthError,
+  TelegramLoginInput,
+  TelegramLoginResult,
+  TelegramLoginError,
 } from "../types/auth.types.js";
 import { ControllerResult } from "../types/common.types.js";
 import {
@@ -162,4 +165,73 @@ export function verifyTelegramRequest(
     );
   }
   return payload;
+}
+
+/**
+ * Mini App: initData → JWT. POST /auth/webapp.
+ */
+export async function webappLogin(
+  input: TelegramAuthInput,
+): Promise<
+  ControllerResult<
+    { token: string } | TelegramAuthError
+  >
+> {
+  try {
+    const initData = typeof input.initData === "string" ? input.initData : "";
+    if (!initData) {
+      throw new ValidationError("initData обязателен.");
+    }
+    const { token } = await authService.ensureTelegramUserAndIssueToken(
+      initData,
+    );
+    return { status: 200, data: { token } };
+  } catch (error) {
+    console.error("webappLogin error:", error);
+    if (error instanceof AppError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+    return {
+      status: 500,
+      data: { ok: false, error: "Не удалось выполнить вход" },
+    };
+  }
+}
+
+export async function telegramLogin(
+  input: TelegramLoginInput,
+): Promise<
+  ControllerResult<TelegramLoginResult | TelegramLoginError>
+> {
+  try {
+    const payload = {
+      id: input.id,
+      first_name: input.first_name,
+      username: input.username,
+      auth_date: input.auth_date,
+      hash: input.hash,
+    };
+    const { token } = await authService.telegramLogin(payload);
+    return {
+      status: 200,
+      data: { token },
+    };
+  } catch (error) {
+    console.error("telegramLogin error:", error);
+
+    if (error instanceof AppError) {
+      return {
+        status: error.statusCode,
+        data: { ok: false, error: error.message },
+      };
+    }
+
+    return {
+      status: 500,
+      data: { ok: false, error: "Не удалось выполнить вход" },
+    };
+  }
 }
