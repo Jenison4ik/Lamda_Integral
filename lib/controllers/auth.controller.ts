@@ -32,6 +32,7 @@ import {
 } from "../errors/app.errors.js";
 import { authService } from "../services/auth.service.js";
 import { telegramAuthService } from "../services/telegram-auth.service.js";
+import { nativeAuthTokenService } from "../services/native-auth-token.service.js";
 
 const getAdminPassword = () => process.env.ADMIN_PASSWORD ?? "";
 const getAdminSecret = () => process.env.ADMIN_JWT_SECRET ?? "";
@@ -232,6 +233,57 @@ export async function telegramLogin(
     return {
       status: 500,
       data: { ok: false, error: "Не удалось выполнить вход" },
+    };
+  }
+}
+
+/**
+ * Native app: запрос временного токена для deep link (t.me/bot?start=auth_<token>).
+ */
+export async function nativeRequestToken(): Promise<
+  ControllerResult<{ token: string } | { ok: false; error: string }>
+> {
+  try {
+    const token = await nativeAuthTokenService.createToken();
+    return { status: 200, data: { token } };
+  } catch (error) {
+    console.error("nativeRequestToken error:", error);
+    return {
+      status: 500,
+      data: { ok: false, error: "Не удалось создать токен" },
+    };
+  }
+}
+
+/**
+ * Native app: опрос — привязан ли токен к пользователю (бот обработал /start auth_<token>).
+ * Если да — возвращает JWT и потребляет токен.
+ */
+export async function nativePoll(token: string): Promise<
+  ControllerResult<
+    | { status: "ok"; token: string }
+    | { status: "pending" }
+    | { ok: false; error: string }
+  >
+> {
+  try {
+    if (!token || typeof token !== "string" || token.length < 10) {
+      return {
+        status: 400,
+        data: { ok: false, error: "Нужен валидный token" },
+      };
+    }
+    const userId = await nativeAuthTokenService.consumeTokenAndGetUserId(token);
+    if (userId == null) {
+      return { status: 200, data: { status: "pending" } };
+    }
+    const { token: jwt } = await authService.issueJwtForUserId(userId);
+    return { status: 200, data: { status: "ok", token: jwt } };
+  } catch (error) {
+    console.error("nativePoll error:", error);
+    return {
+      status: 500,
+      data: { ok: false, error: "Ошибка проверки токена" },
     };
   }
 }

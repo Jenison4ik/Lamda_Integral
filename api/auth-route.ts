@@ -10,6 +10,8 @@ import {
   verifyAdmin,
   webappLogin,
   telegramLogin,
+  nativeRequestToken,
+  nativePoll,
 } from "../lib/controllers/auth.controller.js";
 import { getApiBaseUrl } from "../lib/url.js";
 import type {
@@ -145,6 +147,29 @@ export default async function handler(
     }
     const input: TelegramAuthInput = req.body || {};
     const result = await webappLogin(input);
+    return res.status(result.status).json(result.data);
+  }
+
+  // POST /api/auth/native-request — временный токен для deep link (нативное приложение)
+  if (path === "/api/auth/native-request") {
+    if (req.method !== "POST") {
+      return res.status(405).json({
+        ok: false,
+        error: "Метод не разрешён. Используйте POST.",
+      });
+    }
+    const result = await nativeRequestToken();
+    return res.status(result.status).json(result.data);
+  }
+
+  // GET /api/auth/native-poll?token=... — опрос: привязан ли токен к пользователю
+  if (path === "/api/auth/native-poll") {
+    if (req.method !== "GET") {
+      return res.status(405).setHeader("Allow", "GET").end();
+    }
+    const raw = req.query.token;
+    const token = typeof raw === "string" ? raw : Array.isArray(raw) ? raw[0] : "";
+    const result = await nativePoll(token ?? "");
     return res.status(result.status).json(result.data);
   }
 

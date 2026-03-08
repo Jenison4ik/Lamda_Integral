@@ -69,8 +69,18 @@ async function telegramLogin(payload: {
   return { token };
 }
 
+/**
+ * Выдаёт JWT для уже известного userId (native deep-link flow: бот привязал токен к user, приложение опрашивает poll).
+ */
+function issueJwtForUserId(userId: number): Promise<{ token: string }> {
+  const secret = getAppJwtSecret();
+  const token = signUserToken(secret, userId);
+  return Promise.resolve({ token });
+}
+
 export const authService = {
   ensureTelegramUser,
   ensureTelegramUserAndIssueToken,
   telegramLogin,
+  issueJwtForUserId,
 };

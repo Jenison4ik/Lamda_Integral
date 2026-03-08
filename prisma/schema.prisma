@@ -22,9 +22,23 @@ model User {
   lastSeen    DateTime?
   createdAt   DateTime      @default(now())
 
-  sessions    QuizSession[]
+  sessions         QuizSession[]
+  nativeAuthTokens  NativeAuthToken[]
 
   @@map("users")
+}
+
+/// Временные токены для входа в нативное приложение через deep link (t.me/bot?start=auth_<token>).
+/// Бот при /start auth_XXX привязывает токен к пользователю; приложение получает JWT через poll.
+model NativeAuthToken {
+  id         Int       @id @default(autoincrement())
+  token      String    @unique
+  userId     Int?
+  expiresAt  DateTime
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("native_auth_tokens")
 }
 
 model QuizSession {
