@@ -15,6 +15,26 @@
   },
   "rewrites": [
     {
+      "source": "/api/auth",
+      "destination": "/api/auth-route"
+    },
+    {
+      "source": "/api/auth/:path*",
+      "destination": "/api/auth-route"
+    },
+    {
+      "source": "/api/session/:id/results",
+      "destination": "/api/session-id-route?id=:id&action=results"
+    },
+    {
+      "source": "/api/session/:id/question/:index",
+      "destination": "/api/session-id-route?id=:id&action=question&index=:index"
+    },
+    {
+      "source": "/api/session/:id/answer",
+      "destination": "/api/session-id-route?id=:id&action=answer"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
