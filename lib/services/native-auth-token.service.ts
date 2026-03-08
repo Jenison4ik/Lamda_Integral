@@ -38,6 +38,21 @@ export async function linkTokenToUser(
   const normalized = token.trim();
   if (!normalized) return false;
   const now = new Date();
+  const existing = await prisma.nativeAuthToken.findFirst({
+    where: { token: normalized },
+  });
+  if (!existing) {
+    console.warn("[native-auth] linkTokenToUser: токен не найден в БД, prefix=" + normalized.slice(0, 8) + ". Проверьте, что API и бот используют один DATABASE_URL.");
+    return false;
+  }
+  if (existing.userId != null) {
+    console.warn("[native-auth] linkTokenToUser: токен уже привязан к userId=" + existing.userId);
+    return true;
+  }
+  if (existing.expiresAt <= now) {
+    console.warn("[native-auth] linkTokenToUser: токен истёк, expiresAt=" + existing.expiresAt.toISOString());
+    return false;
+  }
   const updated = await prisma.nativeAuthToken.updateMany({
     where: {
       token: normalized,
@@ -46,6 +61,7 @@ export async function linkTokenToUser(
     },
     data: { userId },
   });
+  console.log("[native-auth] linkTokenToUser: userId=" + userId + ", updated rows=" + updated.count);
   return updated.count > 0;
 }
 

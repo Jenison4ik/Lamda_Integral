@@ -39,6 +39,7 @@ export function createStartHandler(webAppUrl: string): Composer<Context> {
           await ctx.reply("Вы успешно вошли в приложение. Можете вернуться в приложение.");
           return;
         }
+        console.warn("[bot start] linkTokenToUser вернул false, token prefix=" + token.slice(0, 8) + ", userId=" + user.id);
         await ctx.reply("Ссылка для входа устарела или уже использована. Запросите вход заново в приложении.");
         return;
       }
