@@ -67,7 +67,7 @@ export async function linkTokenToUser(
 
 /**
  * Если токен привязан к пользователю и не истёк — возвращает userId и удаляет токен (одноразовый).
- * Иначе возвращает null.
+ * Иначе возвращает null. При гонке двух poll-запросов второй получит count=0 и вернёт null без ошибки.
  */
 export async function consumeTokenAndGetUserId(
   token: string,
@@ -81,7 +81,12 @@ export async function consumeTokenAndGetUserId(
   if (!record || record.expiresAt <= now || record.userId == null) {
     return null;
   }
-  await prisma.nativeAuthToken.delete({ where: { token: normalized } });
+  const deleted = await prisma.nativeAuthToken.deleteMany({
+    where: { token: normalized },
+  });
+  if (deleted.count === 0) {
+    return null;
+  }
   return record.userId;
 }
 
