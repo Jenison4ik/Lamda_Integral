@@ -35,10 +35,12 @@ export async function linkTokenToUser(
   token: string,
   userId: number,
 ): Promise<boolean> {
+  const normalized = token.trim();
+  if (!normalized) return false;
   const now = new Date();
   const updated = await prisma.nativeAuthToken.updateMany({
     where: {
-      token,
+      token: normalized,
       userId: null,
       expiresAt: { gt: now },
     },
@@ -54,14 +56,16 @@ export async function linkTokenToUser(
 export async function consumeTokenAndGetUserId(
   token: string,
 ): Promise<number | null> {
+  const normalized = token.trim();
+  if (!normalized) return null;
   const now = new Date();
   const record = await prisma.nativeAuthToken.findUnique({
-    where: { token },
+    where: { token: normalized },
   });
   if (!record || record.expiresAt <= now || record.userId == null) {
     return null;
   }
-  await prisma.nativeAuthToken.delete({ where: { token } });
+  await prisma.nativeAuthToken.delete({ where: { token: normalized } });
   return record.userId;
 }
 

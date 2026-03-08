@@ -19,10 +19,15 @@ export function createStartHandler(webAppUrl: string): Composer<Context> {
   const composer = new Composer();
 
   composer.command("start", async (ctx) => {
-    const payload = ctx.match?.trim() ?? "";
+    // ctx.match при deep link (t.me/bot?start=auth_xxx) обычно содержит "auth_xxx"; на некоторых клиентах может быть пуст — берём из текста
+    let payload = (ctx.match ?? "").trim();
+    if (!payload && ctx.message?.text) {
+      const text = ctx.message.text.trim();
+      if (text.startsWith("/start ")) payload = text.slice(7).trim();
+    }
 
     if (payload.startsWith(AUTH_PREFIX)) {
-      const token = payload.slice(AUTH_PREFIX.length);
+      const token = payload.slice(AUTH_PREFIX.length).trim();
       if (token.length >= 10 && ctx.from) {
         const user = await userService.upsertFromTelegramLogin({
           telegramId: BigInt(ctx.from.id),

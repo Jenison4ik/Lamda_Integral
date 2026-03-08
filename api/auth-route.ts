@@ -35,7 +35,12 @@ function getPath(req: VercelRequest): string {
   const fromUrl = pathname.replace(/\/$/, "") || "/";
   if (fromUrl.startsWith("/api/auth/")) return fromUrl;
   const pathSegment = req.query.path;
-  const segment = typeof pathSegment === "string" ? pathSegment : Array.isArray(pathSegment) ? pathSegment[0] : "";
+  const segment =
+    typeof pathSegment === "string"
+      ? pathSegment
+      : Array.isArray(pathSegment)
+        ? pathSegment[0]
+        : "";
   return segment ? `/api/auth/${segment}` : "/api/auth";
 }
 
@@ -94,7 +99,11 @@ function parseTelegramLoginQuery(
         : NaN;
   if (!Number.isFinite(auth_date)) return null;
   const hash =
-    typeof q.hash === "string" ? q.hash : Array.isArray(q.hash) ? q.hash[0] : "";
+    typeof q.hash === "string"
+      ? q.hash
+      : Array.isArray(q.hash)
+        ? q.hash[0]
+        : "";
   if (!hash) return null;
   const username =
     typeof q.username === "string"
@@ -113,10 +122,7 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse,
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   const path = getPath(req);
 
   // GET/POST /api/auth — админка
@@ -168,7 +174,8 @@ export default async function handler(
       return res.status(405).setHeader("Allow", "GET").end();
     }
     const raw = req.query.token;
-    const token = typeof raw === "string" ? raw : Array.isArray(raw) ? raw[0] : "";
+    const token =
+      typeof raw === "string" ? raw : Array.isArray(raw) ? raw[0] : "";
     const result = await nativePoll(token ?? "");
     return res.status(result.status).json(result.data);
   }
@@ -257,15 +264,9 @@ export default async function handler(
       );
     }
     const result = await telegramLogin(input);
-    if (
-      result.status !== 200 ||
-      !result.data ||
-      !("token" in result.data)
-    ) {
+    if (result.status !== 200 || !result.data || !("token" in result.data)) {
       const error =
-        result.data &&
-        typeof result.data === "object" &&
-        "error" in result.data
+        result.data && typeof result.data === "object" && "error" in result.data
           ? String((result.data as { error: string }).error)
           : "Ошибка входа";
       res.setHeader("Content-Type", "text/html; charset=utf-8");
