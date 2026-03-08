@@ -17,6 +17,7 @@ function generateToken(): string {
 
 /**
  * Создаёт временный токен для native auth. Истекает через TTL_MINUTES.
+ * Токен пишется в БД, на которую указывает DATABASE_URL (на Vercel — из env проекта).
  */
 export async function createToken(): Promise<string> {
   const token = generateToken();
@@ -24,6 +25,7 @@ export async function createToken(): Promise<string> {
   await prisma.nativeAuthToken.create({
     data: { token, expiresAt },
   });
+  console.log("[native-auth] createToken: создан токен, prefix=" + token.slice(0, 8) + "...");
   return token;
 }
 
